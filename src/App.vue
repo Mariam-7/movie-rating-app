@@ -1,85 +1,37 @@
-<script setup>
-import { RouterLink, RouterView } from 'vue-router'
-import HelloWorld from './components/HelloWorld.vue'
-</script>
-
 <template>
-  <header>
-    <img alt="Vue logo" class="logo" src="@/assets/logo.svg" width="125" height="125" />
+  <div class="app-wrapper">
+    <TopNav @toggle-sidebar="toggleSidebar" />
 
-    <div class="wrapper">
-      <HelloWorld msg="You did it!" />
+    <!-- Sidebar only on specific pages -->
+    <aside v-if="showSidebar" :class="['sidebar', { open: sidebarOpen }]">
+      <ul>
+        <li><RouterLink to="/watched">Watched</RouterLink></li>
+        <li><RouterLink to="/watchlist">Watchlist</RouterLink></li>
+        <li><RouterLink to="/about">About Us</RouterLink></li>
+      </ul>
+    </aside>
 
-      <nav>
-        <RouterLink to="/">Home</RouterLink>
-        <RouterLink to="/about">About</RouterLink>
-      </nav>
-    </div>
-  </header>
-
-  <RouterView />
+    <!-- Main content that shifts when the sidebar is open -->
+    <main :class="['main-content', { shifted: sidebarOpen && showSidebar }]">
+      <router-view />
+    </main>
+  </div>
 </template>
 
-<style scoped>
-header {
-  line-height: 1.5;
-  max-height: 100vh;
+<script setup>
+import TopNav from './components/TopNav.vue'
+import { ref, computed } from 'vue'
+import { useRoute, RouterLink } from 'vue-router'
+
+const sidebarOpen = ref(false)
+
+const toggleSidebar = () => {
+  sidebarOpen.value = !sidebarOpen.value
 }
 
-.logo {
-  display: block;
-  margin: 0 auto 2rem;
-}
+const route = useRoute()
 
-nav {
-  width: 100%;
-  font-size: 12px;
-  text-align: center;
-  margin-top: 2rem;
-}
-
-nav a.router-link-exact-active {
-  color: var(--color-text);
-}
-
-nav a.router-link-exact-active:hover {
-  background-color: transparent;
-}
-
-nav a {
-  display: inline-block;
-  padding: 0 1rem;
-  border-left: 1px solid var(--color-border);
-}
-
-nav a:first-of-type {
-  border: 0;
-}
-
-@media (min-width: 1024px) {
-  header {
-    display: flex;
-    place-items: center;
-    padding-right: calc(var(--section-gap) / 2);
-  }
-
-  .logo {
-    margin: 0 2rem 0 0;
-  }
-
-  header .wrapper {
-    display: flex;
-    place-items: flex-start;
-    flex-wrap: wrap;
-  }
-
-  nav {
-    text-align: left;
-    margin-left: -1rem;
-    font-size: 1rem;
-
-    padding: 1rem 0;
-    margin-top: 1rem;
-  }
-}
-</style>
+const showSidebar = computed(() =>
+  ['/home', '/watched', '/watchlist', '/about'].includes(route.path)
+)
+</script>

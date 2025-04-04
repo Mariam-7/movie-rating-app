@@ -1,15 +1,9 @@
 <template>
-  <div class="about">
-    <h1>This is an about page</h1>
+  <div class="page-content">
+    <h1>About MovieMeter</h1>
+    <p>MovieMeter is your go-to place for tracking movies you’ve watched and want to watch. Built with Vue for a seamless experience!</p>
   </div>
 </template>
 
-<style>
-@media (min-width: 1024px) {
-  .about {
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-  }
-}
-</style>
+<script setup>
+</script>
