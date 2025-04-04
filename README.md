@@ -33,3 +33,11 @@ npm run build
 ```sh
 npm run lint
 ```
+
+## Obtaining an API Key 
+
+[TMDB](https://www.themoviedb.org/?language=en-CA) 
+1. Make an account
+2. Profile --> Settings --> API --> API Key
+3. Add that API Key into MovieService.js in ``` const API_KEY = "given_api_key"   ```
+
