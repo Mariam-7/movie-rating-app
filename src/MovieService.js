@@ -27,3 +27,13 @@ export const getImageUrl = (path) => {
   return path ? `https://image.tmdb.org/t/p/w500${path}` : "https://via.placeholder.com/100x150";
 };
 
+export const getPopularMovies = async () => {
+  try {
+    const response = await fetch(`${BASE_URL}/movie/popular?api_key=${API_KEY}`);
+    const data = await response.json();
+    return data.results;
+  } catch (error) {
+    console.error("Error fetching popular movies:", error);
+    return [];
+  }
+};
