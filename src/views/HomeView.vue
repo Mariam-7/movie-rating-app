@@ -2,17 +2,18 @@
   <div class="home">  
     <div class="page-content">
       <div class="search-bar">
-        <h1>Welcome to MovieMeter </h1>
+        <h1>Welcome back, {{ userEmail }}!</h1>
+        <button @click="handleLogout" class="logout-btn">Logout</button>
         <input v-model="query" @input="searchMovies" placeholder="Search for movies..." />
       </div>
       <div class="dashboard">
-          <div v-if="movies.length" class="movie-carousel">
-        <div v-for="movie in movies" :key="movie.id" class="movie-card">
-          <img :src="getImageUrl(movie.poster_path)" alt="Movie" width="150" />
-          <h3>{{ movie.title }}</h3>
-          <p>{{ movie.overview }}</p>
+        <div v-if="movies.length" class="movie-carousel">
+          <div v-for="movie in movies" :key="movie.id" class="movie-card">
+            <img :src="getImageUrl(movie.poster_path)" alt="Movie" width="150" />
+            <h3>{{ movie.title }}</h3>
+            <p>{{ movie.overview }}</p>
+          </div>
         </div>
-      </div>
         <p v-else>Start by searching for movies!</p>
       </div>
     </div>
@@ -20,17 +21,28 @@
 </template>
 
 <script>
-import { searchMovies, getImageUrl, getPopularMovies } from "/Users/Ainia Farqaleet/movie-rating-app/src/MovieService"; 
-
+import { searchMovies, getImageUrl, getPopularMovies } from "../MovieService";
+import { auth } from "@/firebase"; // Import Firebase auth
+import { signOut } from 'firebase/auth'
 export default {
   data() {
     return {
       query: "",
-      movies: []
+      movies: [],
+      userEmail: "Guest" // Default value
     };
   },
   async mounted() {
-    // load popular movies by default
+    // Get current user
+    const user = auth.currentUser;
+    
+    if (user && user.email) {
+      this.userEmail = user.email;
+    } else {
+      this.userEmail = "Guest";
+    }
+    
+    // Load popular movies
     this.movies = await getPopularMovies();
   },
   methods: {
@@ -38,8 +50,15 @@ export default {
       if (this.query.length > 2) {
         this.movies = await searchMovies(this.query);
       } else if (this.query.length === 0) {
-        //  popular movies will show again if the search bar is cleared 
         this.movies = await getPopularMovies();
+      }
+    },
+    async handleLogout() {
+      try {
+        await signOut(auth)
+        this.$router.push('/login')
+      } catch (error) {
+        console.error('Logout failed:', error)
       }
     },
     getImageUrl(path) {
@@ -49,51 +68,4 @@ export default {
 };
 </script>
 
-
-<style scoped>
-.home {
-  display: flex;
-  height: 100vh;
-}
-
-.search-bar {
-  margin-bottom: 20px;
-}
-
-.search-bar input {
-  width: 100%;
-  padding: 10px;
-  font-size: 16px;
-}
-
-.dashboard {
-  margin-top: 20px;
-}
-
-.dashboard h2 {
-  margin-bottom: 20px;
-}
-
-.dashboard img {
-  margin-right: 10px;
-}
-.movie-carousel {
-display: flex;
-overflow-x: auto;
-gap: 10px;
-padding: 10px;
-white-space: nowrap;
-scroll-behavior: smooth;
-}
-
-.movie-card {
-flex: 0 0 100%;  
-max-width: 500px;  
-text-align: center;
-padding: 20px;
-background: lightcyan;
-color: black;
-border-radius: 10px;
-}
-
-</style>
+<!-- Your existing styles remain the same -->
