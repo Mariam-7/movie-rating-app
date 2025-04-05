@@ -3,10 +3,10 @@ import { getAuth, onAuthStateChanged } from "firebase/auth"
 import { initializeFirestore, persistentLocalCache, doc, setDoc } from "firebase/firestore"
 
 const firebaseConfig = {
-  apiKey: "AIzaSyAp-yCvIfgVxPt5R2QgCkat0SoqKGUHWiw",
-  authDomain: "moviemetre-824f7.firebaseapp.com",
-  projectId: "moviemetre-824f7",
-  storageBucket: "moviemetre-824f7.firebasestorage.app",
+  apiKey: process.env.VUE_APP_FIREBASE_API_KEY,
+  authDomain: process.env.VUE_APP_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.VUE_APP_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.VUE_APP_FIREBASE_STORAGE_BUCKET,
   messagingSenderId: "536135692717",
   appId: "1:536135692717:web:50adba06fe718928c23124",
   measurementId: "G-GGMGBWHMMP"
