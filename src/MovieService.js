@@ -1,4 +1,4 @@
-const API_KEY = 'ef26ff08f948fa7c0df02787605b9396' //MAKE SURE TO ADD UR OWN API KEY
+const API_KEY = 'e73c2a39fe7c1f3a9e5203aaafd098af' //MAKE SURE TO ADD UR OWN API KEY
 const BASE_URL = 'https://api.themoviedb.org/3'
 
 export const searchMovies = async (query) => {
