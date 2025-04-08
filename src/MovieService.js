@@ -1,39 +1,39 @@
-const API_KEY = "e73c2a39fe7c1f3a9e5203aaafd098af" //MAKE SURE TO ADD UR OWN API KEY 
-const BASE_URL = "https://api.themoviedb.org/3";
+const API_KEY = 'ef26ff08f948fa7c0df02787605b9396' //MAKE SURE TO ADD UR OWN API KEY
+const BASE_URL = 'https://api.themoviedb.org/3'
 
 export const searchMovies = async (query) => {
   try {
-    const response = await fetch(`${BASE_URL}/search/movie?api_key=${API_KEY}&query=${query}`);
-    const data = await response.json();
-    return data.results;  
+    const response = await fetch(`${BASE_URL}/search/movie?api_key=${API_KEY}&query=${query}`)
+    const data = await response.json()
+    return data.results
   } catch (error) {
-    console.error("could not fetch movies:", error);
-    return [];
+    console.error('could not fetch movies:', error)
+    return []
   }
-};
+}
 
 export const getMovieDetails = async (movieId) => {
   try {
-    const response = await fetch(`${BASE_URL}/movie/${movieId}?api_key=${API_KEY}`);
-    return await response.json();
+    const response = await fetch(`${BASE_URL}/movie/${movieId}?api_key=${API_KEY}`)
+    return await response.json()
   } catch (error) {
-    console.error("could not fetch details:", error);
-    return null;
+    console.error('could not fetch details:', error)
+    return null
   }
-};
+}
 
 // movie poster URL
 export const getImageUrl = (path) => {
-  return path ? `https://image.tmdb.org/t/p/w500${path}` : "https://via.placeholder.com/100x150";
-};
+  return path ? `https://image.tmdb.org/t/p/w500${path}` : 'https://via.placeholder.com/100x150'
+}
 
 export const getPopularMovies = async () => {
   try {
-    const response = await fetch(`${BASE_URL}/movie/popular?api_key=${API_KEY}`);
-    const data = await response.json();
-    return data.results;
+    const response = await fetch(`${BASE_URL}/movie/popular?api_key=${API_KEY}`)
+    const data = await response.json()
+    return data.results
   } catch (error) {
-    console.error("Error fetching popular movies:", error);
-    return [];
+    console.error('Error fetching popular movies:', error)
+    return []
   }
-};
+}

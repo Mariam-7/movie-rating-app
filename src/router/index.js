@@ -5,6 +5,7 @@ import HomeView from '../views/HomeView.vue'
 import WatchlistView from '../views/WatchlistView.vue'
 import WatchedView from '../views/WatchedView.vue'
 import AboutView from '../views/AboutView.vue'
+import MovieDetails from '../views/MovieDetails.vue'
 
 const routes = [
   { path: '/', redirect: '/login' },
@@ -13,12 +14,13 @@ const routes = [
   { path: '/home', name: 'home', component: HomeView },
   { path: '/watchlist', name: 'watchlist', component: WatchlistView },
   { path: '/watched', name: 'watched', component: WatchedView },
-  { path: '/about', name: 'about', component: AboutView }
+  { path: '/about', name: 'about', component: AboutView },
+  { path: '/movie/:id', name: 'MovieDetails', component: MovieDetails, props: true },
 ]
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
-  routes
+  routes,
 })
 
 export default router

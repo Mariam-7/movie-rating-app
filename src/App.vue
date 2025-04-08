@@ -32,6 +32,6 @@ const toggleSidebar = () => {
 const route = useRoute()
 
 const showSidebar = computed(() =>
-  ['/home', '/watched', '/watchlist', '/about'].includes(route.path)
+  ['/home', '/watched', '/watchlist', '/about'].includes(route.path),
 )
 </script>
