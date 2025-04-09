@@ -51,16 +51,17 @@
         <span
           v-for="i in 10"
           :key="i"
-          :class="{'filled': i <= review.rating}"
+          :class="{ filled: i <= review.rating }"
           @click="setRating(i)"
           class="star"
-        >&#9733;</span>
+          >&#9733;</span
+        >
       </div>
 
       <textarea v-model="review.note" placeholder="Write your review here..."></textarea>
 
       <!-- Error Message -->
-      <p v-if="ratingError" style="color: red;">Please select a rating between 1 and 10.</p>
+      <p v-if="ratingError" style="color: red">Please select a rating between 1 and 10.</p>
 
       <button @click="saveReview" class="review-btn">Submit Review</button>
     </div>
@@ -107,11 +108,15 @@ const ratingError = ref(false)
 onMounted(async () => {
   const id = route.params.id
   try {
-    const res = await fetch(`https://api.themoviedb.org/3/movie/${id}?api_key=${import.meta.env.VITE_TMDB_API_KEY}`)
+    const res = await fetch(
+      `https://api.themoviedb.org/3/movie/${id}?api_key=${import.meta.env.VITE_TMDB_API_KEY}`,
+    )
     const data = await res.json()
     movie.value = data
 
-    const recRes = await fetch(`https://api.themoviedb.org/3/movie/${id}/similar?api_key=${import.meta.env.VITE_TMDB_API_KEY}`)
+    const recRes = await fetch(
+      `https://api.themoviedb.org/3/movie/${id}/similar?api_key=${import.meta.env.VITE_TMDB_API_KEY}`,
+    )
     const recData = await recRes.json()
     recommendedMovies.value = recData.results
   } catch (error) {
@@ -121,7 +126,7 @@ onMounted(async () => {
 
 // Handle adding to the watched list
 const handleWatchedClick = () => {
-  showReviewForm.value = true  // Show the review form when "Watched" is clicked
+  showReviewForm.value = true // Show the review form when "Watched" is clicked
 }
 
 const saveReview = async () => {
@@ -152,7 +157,7 @@ const saveReview = async () => {
       await updateDoc(userRef, {
         watched: watchedList,
       })
-      showReviewForm.value = false  // Close the review form
+      showReviewForm.value = false // Close the review form
       console.log('Movie and review added to watched list!')
     } else {
       alert('Movie already in Watched list!')
@@ -163,17 +168,53 @@ const saveReview = async () => {
 // Set rating when a star is clicked
 const setRating = (rating) => {
   review.value.rating = rating
-  ratingError.value = false  // Reset error message
+  ratingError.value = false // Reset error message
 }
 
 // Fetch movie poster image
 const getImageUrl = (path) => {
-  return path ? `https://image.tmdb.org/t/p/w500${path}` : 'https://via.placeholder.com/150x225?text=No+Image'
+  return path
+    ? `https://image.tmdb.org/t/p/w500${path}`
+    : 'https://via.placeholder.com/150x225?text=No+Image'
 }
 
 const posterUrl = computed(() =>
   movie.value?.poster_path ? `https://image.tmdb.org/t/p/w500${movie.value.poster_path}` : '',
 )
+
+const showTrailer = async () => {
+  if (!movie.value?.id) return
+
+  try {
+    const res = await fetch(
+      `https://api.themoviedb.org/3/movie/${movie.value.id}/videos?api_key=${import.meta.env.VITE_TMDB_API_KEY}`,
+    )
+    const data = await res.json()
+
+    const trailers = data.results.filter((vid) => vid.type === 'Trailer' && vid.site === 'YouTube')
+
+    // First look for official trailer with matching name
+    let trailer = trailers.find((vid) => vid.official && /official trailer/i.test(vid.name))
+
+    // If not found, fallback to any official trailer
+    if (!trailer) {
+      trailer = trailers.find((vid) => vid.official)
+    }
+
+    // Final fallback to any trailer
+    if (!trailer && trailers.length) {
+      trailer = trailers[0]
+    }
+
+    if (trailer) {
+      trailerUrl.value = `https://www.youtube.com/embed/${trailer.key}`
+    } else {
+      alert('No trailer available for this movie.')
+    }
+  } catch (error) {
+    console.error('Error fetching trailer:', error)
+  }
+}
 
 const closeTrailer = () => {
   trailerUrl.value = null
