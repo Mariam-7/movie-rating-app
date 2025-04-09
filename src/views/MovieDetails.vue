@@ -41,6 +41,11 @@
       ></iframe>
       <button class="close-btn" @click="closeTrailer">Close</button>
     </div>
+    
+    <div class="action-buttons">
+        <button @click="addToWatched">Watched</button>
+        <button @click="addToWantToWatch">Want to Watch</button>
+    </div>
 
     <div v-if="recommendedMovies.length" class="recommended-section">
       <h2>Similar Movies</h2>
@@ -108,6 +113,23 @@ const showTrailer = async () => {
 const closeTrailer = () => {
   trailerUrl.value = null
 }
+  const addToWatched = () => {
+    const watchedList = JSON.parse(localStorage.getItem('watched')) 
+    if (!watchedList.find(m => m.id === movie.value.id)) {
+        watchedList.push(movie.value)
+        localStorage.setItem('watched', JSON.stringify(watchedList))
+    } else {
+        alert('Movie already in Watched list!')
+  }}
+
+  const addToWantToWatch = () => {
+    const wantToWatchList = JSON.parse(localStorage.getItem('wantToWatch'))
+    if (!wantToWatchList.find(m => m.id === movie.value.id)) {
+        wantToWatchList.push(movie.value)
+        localStorage.setItem('wantToWatch', JSON.stringify(wantToWatchList))
+  } else {
+      alert('Movie already in Want to Watch list!')
+  }}
 
 // Computed property to format duration into hours and minutes
 const formattedDuration = computed(() => {
