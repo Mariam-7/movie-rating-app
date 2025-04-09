@@ -1,21 +1,17 @@
 <template>
   <div class="watched-view">
     <h1>Your Watched Movies</h1>
-    
-    <!-- If no movies are watched, display a message -->
     <div v-if="watchedMovies.length === 0" class="no-movies">
       <p>Start adding some movies!</p>
     </div>
-
-    <!-- Display movies if watchedMovies is populated -->
     <div v-else class="movie-list">
       <div v-for="movie in watchedMovies" :key="movie.id" class="movie-item">
-        <img :src="getImageUrl(movie.poster_path)" alt="Movie Poster" />
-        <div class="movie-info">
+        <router-link :to="`/movie/${movie.id}`" class="movie-link">
+          <img :src="getImageUrl(movie.poster_path)" alt="Movie Poster" width="150" />
           <h3>{{ movie.title }}</h3>
-          <p>{{ movie.overview }}</p>
-          <button @click="removeFromWatched(movie.id)" class="remove-btn">Remove Movie</button>
-        </div>
+        </router-link>
+        <p>{{ movie.overview }}</p>
+        <button @click="removeFromWatched(movie.id)" class="remove-btn">Remove Movie</button>
       </div>
     </div>
   </div>
