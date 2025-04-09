@@ -40,7 +40,7 @@
     </div>
 
     <div v-if="recommendedMovies.length" class="recommended-section">
-      <h2>Recommended Movies</h2>
+      <h2>Similar Movies</h2>
       <div class="recommended-list">
         <div v-for="rec in recommendedMovies" :key="rec.id" class="recommended-item">
           <router-link :to="`/movie/${rec.id}`" class="rec-link">
@@ -74,7 +74,7 @@ onMounted(async () => {
   movie.value = data
 
   // Fetch recommended movies
-  const recRes = await fetch(`${BASE_URL}/movie/${id}/recommendations?api_key=${API_KEY}`)
+  const recRes = await fetch(`${BASE_URL}/movie/${id}/similar?api_key=${API_KEY}`)
   const recData = await recRes.json()
   recommendedMovies.value = recData.results
 })
