@@ -1,7 +1,6 @@
 <template>
   <div class="watched-view">
     <h1>Your Watched Movies</h1>
-    <p>Here you’ll see all the movies you’ve watched. 🎬</p>
     
     <div v-if="watchedMovies.length === 0" class="no-movies">
       <p>Start adding some movies!</p>
