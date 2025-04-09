@@ -2,10 +2,12 @@
   <div class="watched-view">
     <h1>Your Watched Movies</h1>
     
+    <!-- If no movies are watched, display a message -->
     <div v-if="watchedMovies.length === 0" class="no-movies">
       <p>Start adding some movies!</p>
     </div>
 
+    <!-- Display movies if watchedMovies is populated -->
     <div v-else class="movie-list">
       <div v-for="movie in watchedMovies" :key="movie.id" class="movie-item">
         <img :src="getImageUrl(movie.poster_path)" alt="Movie Poster" />
@@ -21,20 +23,59 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { getImageUrl } from '@/MovieService'  
+import { getAuth } from 'firebase/auth'
+import { doc, getDoc, updateDoc } from 'firebase/firestore'
+import { db } from '../firebase'
 
 const watchedMovies = ref([])
 
-onMounted(() => {
-  const storedWatched = JSON.parse(localStorage.getItem('watched')) || []
-  watchedMovies.value = storedWatched
+// Fetch watched movies from Firestore when the component is mounted
+onMounted(async () => {
+  const user = getAuth().currentUser;
+  if (user) {
+    try {
+      const userRef = doc(db, 'users', user.uid);
+      const docSnap = await getDoc(userRef);
+      if (docSnap.exists()) {
+        // Load watched movies from Firestore (if any)
+        watchedMovies.value = docSnap.data().watched || [];
+      } else {
+        console.log('No watched movies found for this user');
+      }
+    } catch (error) {
+      console.error('Error fetching watched movies:', error);
+    }
+  } else {
+    console.log('User not logged in');
+  }
 })
 
-const removeFromWatched = (movieId) => {
-  const updatedWatched = watchedMovies.value.filter(movie => movie.id !== movieId)
-  localStorage.setItem('watched', JSON.stringify(updatedWatched))
-  watchedMovies.value = updatedWatched 
-  alert('Movie removed from Watched list!')
+// Helper function to generate image URLs for movie posters
+const getImageUrl = (path) => {
+  return path ? `https://image.tmdb.org/t/p/w500${path}` : 'https://via.placeholder.com/150x225?text=No+Image';
+}
+
+// Remove a movie from the watched list and update Firestore
+const removeFromWatched = async (movieId) => {
+  // Update watchedMovies locally
+  const updatedWatched = watchedMovies.value.filter(movie => movie.id !== movieId);
+  watchedMovies.value = updatedWatched; // Immediate UI update
+  
+  // Update Firestore to reflect the removal
+  const user = getAuth().currentUser;
+  if (user) {
+    try {
+      const userRef = doc(db, 'users', user.uid);
+      await updateDoc(userRef, {
+        watched: updatedWatched, // Update the watched list in Firestore
+      });
+      console.log('Movie removed from watched list in Firestore!');
+    } catch (error) {
+      console.error('Error removing movie from watched list:', error);
+    }
+  }
+
+  alert('Movie removed from Watched list!');
 }
 </script>
 

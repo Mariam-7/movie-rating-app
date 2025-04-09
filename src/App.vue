@@ -2,8 +2,8 @@
   <div class="app-wrapper">
     <TopNav @toggle-sidebar="toggleSidebar" />
 
-    <!-- Sidebar only on specific pages -->
-    <aside v-if="showSidebar" :class="['sidebar', { open: sidebarOpen }]">
+    <!-- Sidebar (Always visible, but can be toggled open/closed) -->
+    <aside :class="['sidebar', { open: sidebarOpen }]">
       <ul>
         <li><RouterLink to="/watched">Watched</RouterLink></li>
         <li><RouterLink to="/watchlist">Watchlist</RouterLink></li>
@@ -12,7 +12,7 @@
     </aside>
 
     <!-- Main content that shifts when the sidebar is open -->
-    <main :class="['main-content', { shifted: sidebarOpen && showSidebar }]">
+    <main :class="['main-content', { shifted: sidebarOpen }]">
       <router-view />
     </main>
   </div>

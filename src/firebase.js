@@ -1,6 +1,6 @@
-import { initializeApp } from 'firebase/app'
-import { getAuth, onAuthStateChanged } from 'firebase/auth'
-import { initializeFirestore, persistentLocalCache, doc, setDoc } from 'firebase/firestore'
+import { initializeApp } from 'firebase/app';
+import { getAuth, onAuthStateChanged } from 'firebase/auth';
+import { getFirestore, doc, setDoc, getDoc, updateDoc } from 'firebase/firestore';
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -11,12 +11,9 @@ const firebaseConfig = {
   appId: import.meta.env.VITE_FIREBASE_APP_ID,
   measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID,
 }
-
-const app = initializeApp(firebaseConfig)
-const auth = getAuth(app)
-const db = initializeFirestore(app, {
-  localCache: persistentLocalCache(),
-})
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
 
 export const initAuth = (callback) => {
   const unsubscribe = onAuthStateChanged(auth, async (user) => {

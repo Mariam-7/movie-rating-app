@@ -9,14 +9,14 @@
       <!-- Movie Details -->
       <div class="movie-info">
         <h1>{{ movie.title }}</h1>
-        <p><strong>Release Date:</strong> {{ movie.release_date }}</p>
+        <p><strong>Release Date:</strong> {{ movie.release_date || 'N/A' }}</p>
         <p>
-          <strong>Rating:</strong> {{ movie.vote_average }}/10
+          <strong>Rating:</strong> {{ movie.vote_average || 'N/A' }}/10
           <span class="stars">{{ starRating }}</span>
         </p>
 
         <!-- Display Genres -->
-        <p>
+        <p v-if="movie.genres && movie.genres.length">
           <strong>Genres: </strong>
           <span v-for="(genre, index) in movie.genres" :key="genre.id">
             {{ genre.name }}<span v-if="index < movie.genres.length - 1">,</span>
@@ -24,9 +24,9 @@
         </p>
 
         <!-- Display Duration -->
-        <p><strong>Duration:</strong> {{ formattedDuration }}</p>
+        <p><strong>Duration:</strong> {{ formattedDuration || 'N/A' }}</p>
 
-        <p>{{ movie.overview }}</p>
+        <p>{{ movie.overview || 'No overview available.' }}</p>
         <button @click="showTrailer" class="trailer-btn">Watch Trailer</button>
       </div>
     </div>
@@ -41,10 +41,10 @@
       ></iframe>
       <button class="close-btn" @click="closeTrailer">Close</button>
     </div>
-    
+
     <div class="action-buttons">
-        <button @click="addToWatched">Watched</button>
-        <button @click="addToWantToWatch">Want to Watch</button>
+      <button @click="addToWatched">Watched</button>
+      <button @click="addToWantToWatch">Want to Watch</button>
     </div>
 
     <div v-if="recommendedMovies.length" class="recommended-section">
@@ -65,6 +65,11 @@
 import { onMounted, ref, computed } from 'vue'
 import { useRoute } from 'vue-router'
 
+// Import Firebase functions
+import { getAuth } from 'firebase/auth'
+import { doc, getDoc, updateDoc } from 'firebase/firestore'
+import { db } from '../firebase' // Make sure you have the Firebase config properly set up
+
 const API_KEY = import.meta.env.VITE_TMDB_API_KEY
 const BASE_URL = 'https://api.themoviedb.org/3'
 const IMAGE_BASE_URL = 'https://image.tmdb.org/t/p/w500'
@@ -77,16 +82,52 @@ const recommendedMovies = ref([])
 onMounted(async () => {
   const id = route.params.id
   // Fetch movie details
-  const res = await fetch(`${BASE_URL}/movie/${id}?api_key=${API_KEY}`)
-  const data = await res.json()
-  movie.value = data
+  try {
+    const res = await fetch(`${BASE_URL}/movie/${id}?api_key=${API_KEY}`)
+    const data = await res.json()
+    movie.value = data
 
-  // Fetch recommended movies
-  const recRes = await fetch(`${BASE_URL}/movie/${id}/similar?api_key=${API_KEY}`)
-  const recData = await recRes.json()
-  recommendedMovies.value = recData.results
+    // Fetch recommended movies
+    const recRes = await fetch(`${BASE_URL}/movie/${id}/similar?api_key=${API_KEY}`)
+    const recData = await recRes.json()
+    recommendedMovies.value = recData.results
+  } catch (error) {
+    console.error('Error fetching movie details or recommendations:', error)
+  }
 })
 
+// Function to add movie to the "watched" list
+const addToWatched = async () => {
+  const user = getAuth().currentUser;
+  if (user) {
+    const userRef = doc(db, 'users', user.uid);
+    const docSnap = await getDoc(userRef);
+    let watchedList = docSnap.exists() ? docSnap.data().watched || [] : [];
+
+    // Add only essential details to watched list
+    const movieData = {
+      id: movie.value.id,
+      title: movie.value.title,
+      poster_path: movie.value.poster_path,
+      release_date: movie.value.release_date,
+      overview: movie.value.overview,
+    };
+
+    // Avoid adding duplicates
+    if (!watchedList.find(m => m.id === movie.value.id)) {
+      watchedList.push(movieData);
+      await updateDoc(userRef, {
+        watched: watchedList,
+      });
+      console.log('Movie added to watched list!');
+    } else {
+      alert('Movie already in Watched list!');
+    }
+  }
+}
+
+
+// Helper function to get image URL
 const getImageUrl = (path) => {
   return path ? `${IMAGE_BASE_URL}${path}` : 'https://via.placeholder.com/150x225?text=No+Image'
 }
@@ -95,6 +136,7 @@ const posterUrl = computed(() =>
   movie.value?.poster_path ? `${IMAGE_BASE_URL}${movie.value.poster_path}` : '',
 )
 
+// Function to show trailer video
 const showTrailer = async () => {
   const id = route.params.id
   // Fetch trailer video data using the movie ID
@@ -113,23 +155,6 @@ const showTrailer = async () => {
 const closeTrailer = () => {
   trailerUrl.value = null
 }
-  const addToWatched = () => {
-    const watchedList = JSON.parse(localStorage.getItem('watched')) || [] 
-    if (!watchedList.find(m => m.id === movie.value.id)) {
-        watchedList.push(movie.value)
-        localStorage.setItem('watched', JSON.stringify(watchedList))
-    } else {
-        alert('Movie already in Watched list!')
-  }}
-
-  const addToWantToWatch = () => {
-    const wantToWatchList = JSON.parse(localStorage.getItem('wantToWatch')) || []
-    if (!wantToWatchList.find(m => m.id === movie.value.id)) {
-        wantToWatchList.push(movie.value)
-        localStorage.setItem('wantToWatch', JSON.stringify(wantToWatchList))
-  } else {
-      alert('Movie already in Want to Watch list!')
-  }}
 
 // Computed property to format duration into hours and minutes
 const formattedDuration = computed(() => {
@@ -148,6 +173,7 @@ const starRating = computed(() => {
 })
 </script>
 
+
 <style scoped>
 .movie-details {
   padding: 20px;
@@ -155,14 +181,14 @@ const starRating = computed(() => {
 
 .movie-container {
   display: flex;
-  flex-wrap: wrap; /* Allows wrapping for smaller screens */
+  flex-wrap: wrap;
   gap: 20px;
   justify-content: flex-start;
 }
 
 .movie-cover {
-  flex: 1 1 200px; /* Flex: grow, shrink, basis - makes image flexible */
-  max-width: 250px; /* Limit image size */
+  flex: 1 1 200px;
+  max-width: 250px;
 }
 
 .movie-poster {
@@ -172,7 +198,7 @@ const starRating = computed(() => {
 }
 
 .movie-info {
-  flex: 2 1 400px; /* More space for movie details */
+  flex: 2 1 400px;
   padding: 10px;
 }
 
@@ -235,21 +261,6 @@ button:hover {
   background-color: #c82333;
 }
 
-/* Responsive Design for smaller screens */
-@media (max-width: 768px) {
-  .movie-container {
-    flex-direction: column; /* Stack the image and info vertically */
-  }
-
-  .movie-cover {
-    max-width: 100%; /* Make image take full width on small screens */
-  }
-
-  .movie-info {
-    padding: 15px;
-  }
-}
-
 .recommended-section {
   margin-top: 40px;
 }
@@ -285,16 +296,16 @@ button:hover {
 
 .rec-link {
   text-decoration: none;
-  color: inherit; /* Match surrounding text color */
+  color: inherit;
 }
 
 .rec-link:hover {
-  opacity: 0.9; /* Optional: subtle hover effect */
+  opacity: 0.9;
 }
 
 .stars {
   font-size: 1.2rem;
-  color: #f5c518; /* IMDb-style gold */
+  color: #f5c518;
   margin-left: 10px;
 }
 </style>
