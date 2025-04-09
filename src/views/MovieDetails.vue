@@ -11,6 +11,18 @@
         <h1>{{ movie.title }}</h1>
         <p><strong>Release Date:</strong> {{ movie.release_date }}</p>
         <p><strong>Rating:</strong> {{ movie.vote_average }}/10</p>
+
+        <!-- Display Genres -->
+        <p>
+          <strong>Genres: </strong>
+          <span v-for="(genre, index) in movie.genres" :key="genre.id">
+            {{ genre.name }}<span v-if="index < movie.genres.length - 1">,</span>
+          </span>
+        </p>
+
+        <!-- Display Duration -->
+        <p><strong>Duration:</strong> {{ formattedDuration }}</p>
+
         <p>{{ movie.overview }}</p>
         <button @click="showTrailer" class="trailer-btn">Watch Trailer</button>
       </div>
@@ -26,6 +38,18 @@
       ></iframe>
       <button class="close-btn" @click="closeTrailer">Close</button>
     </div>
+
+    <div v-if="recommendedMovies.length" class="recommended-section">
+      <h2>Recommended Movies</h2>
+      <div class="recommended-list">
+        <div v-for="rec in recommendedMovies" :key="rec.id" class="recommended-item">
+          <router-link :to="`/movie/${rec.id}`" class="rec-link">
+            <img :src="getImageUrl(rec.poster_path)" alt="Recommended Movie" />
+            <p>{{ rec.title }}</p>
+          </router-link>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -40,6 +64,7 @@ const IMAGE_BASE_URL = 'https://image.tmdb.org/t/p/w500'
 const route = useRoute()
 const movie = ref(null)
 const trailerUrl = ref(null)
+const recommendedMovies = ref([])
 
 onMounted(async () => {
   const id = route.params.id
@@ -47,7 +72,16 @@ onMounted(async () => {
   const res = await fetch(`${BASE_URL}/movie/${id}?api_key=${API_KEY}`)
   const data = await res.json()
   movie.value = data
+
+  // Fetch recommended movies
+  const recRes = await fetch(`${BASE_URL}/movie/${id}/recommendations?api_key=${API_KEY}`)
+  const recData = await recRes.json()
+  recommendedMovies.value = recData.results
 })
+
+const getImageUrl = (path) => {
+  return path ? `${IMAGE_BASE_URL}${path}` : 'https://via.placeholder.com/150x225?text=No+Image'
+}
 
 const posterUrl = computed(() =>
   movie.value?.poster_path ? `${IMAGE_BASE_URL}${movie.value.poster_path}` : '',
@@ -71,6 +105,17 @@ const showTrailer = async () => {
 const closeTrailer = () => {
   trailerUrl.value = null
 }
+
+// Computed property to format duration into hours and minutes
+const formattedDuration = computed(() => {
+  const duration = movie.value?.runtime
+  if (duration) {
+    const hours = Math.floor(duration / 60)
+    const minutes = duration % 60
+    return `${hours}h ${minutes}m`
+  }
+  return 'N/A' // If runtime is not available
+})
 </script>
 
 <style scoped>
@@ -173,5 +218,47 @@ button:hover {
   .movie-info {
     padding: 15px;
   }
+}
+
+.recommended-section {
+  margin-top: 40px;
+}
+
+.recommended-section h2 {
+  font-size: 1.5rem;
+  margin-bottom: 20px;
+}
+
+.recommended-list {
+  display: flex;
+  gap: 15px;
+  overflow-x: auto;
+  padding-bottom: 10px;
+}
+
+.recommended-item {
+  flex: 0 0 auto;
+  width: 150px;
+  text-align: center;
+}
+
+.recommended-item img {
+  width: 100%;
+  height: auto;
+  border-radius: 8px;
+}
+
+.recommended-item p {
+  margin-top: 8px;
+  font-size: 0.9rem;
+}
+
+.rec-link {
+  text-decoration: none;
+  color: inherit; /* Match surrounding text color */
+}
+
+.rec-link:hover {
+  opacity: 0.9; /* Optional: subtle hover effect */
 }
 </style>
