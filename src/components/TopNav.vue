@@ -1,17 +1,11 @@
 <template>
   <nav class="top-nav">
-    <button
-      v-if="showSidebarToggle"
-      class="sidebar-toggle"
-      @click="$emit('toggle-sidebar')"
-    >
+    <button v-if="showSidebarToggle" class="sidebar-toggle" @click="$emit('toggle-sidebar')">
       ☰
     </button>
 
     <!-- Make "MOVIEMETER" clickable and navigate to home, except on login/signup pages -->
-    <RouterLink v-if="!isLoginOrSignup" to="/home" class="app-title">
-      MOVIEMETER
-    </RouterLink>
+    <RouterLink v-if="!isLoginOrSignup" to="/home" class="app-title"> MOVIEMETER </RouterLink>
     <h1 v-else class="app-title">MOVIEMETER</h1>
 
     <div class="theme-toggle-container">
@@ -53,7 +47,30 @@ const isLoginOrSignup = computed(() => {
   return route.path === '/login' || route.path === '/signup'
 })
 
-watch(() => route.path, (newPath) => {
-  showSidebarToggle.value = !(newPath === '/login' || newPath === '/signup')
-}, { immediate: true })
+watch(
+  () => route.path,
+  (newPath) => {
+    showSidebarToggle.value = !(newPath === '/login' || newPath === '/signup')
+  },
+  { immediate: true },
+)
 </script>
+
+<style scoped>
+.app-title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #ffffff;
+  text-decoration: none;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  text-shadow: 2px 2px 8px rgba(0, 123, 255, 0.6); /* blue glow effect */
+  transition:
+    color 0.3s ease,
+    transform 0.3s ease;
+}
+
+.app-title:hover {
+  color: #00aaff; /* lighter blue on hover */
+  transform: scale(1.05);
+}
+</style>

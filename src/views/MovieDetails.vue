@@ -10,7 +10,10 @@
       <div class="movie-info">
         <h1>{{ movie.title }}</h1>
         <p><strong>Release Date:</strong> {{ movie.release_date }}</p>
-        <p><strong>Rating:</strong> {{ movie.vote_average }}/10</p>
+        <p>
+          <strong>Rating:</strong> {{ movie.vote_average }}/10
+          <span class="stars">{{ starRating }}</span>
+        </p>
 
         <!-- Display Genres -->
         <p>
@@ -115,6 +118,11 @@ const formattedDuration = computed(() => {
     return `${hours}h ${minutes}m`
   }
   return 'N/A' // If runtime is not available
+})
+
+const starRating = computed(() => {
+  const ratingOutOfFive = Math.round((movie.value?.vote_average || 0) / 2)
+  return '★'.repeat(ratingOutOfFive) + '☆'.repeat(5 - ratingOutOfFive)
 })
 </script>
 
@@ -260,5 +268,11 @@ button:hover {
 
 .rec-link:hover {
   opacity: 0.9; /* Optional: subtle hover effect */
+}
+
+.stars {
+  font-size: 1.2rem;
+  color: #f5c518; /* IMDb-style gold */
+  margin-left: 10px;
 }
 </style>
