@@ -42,8 +42,31 @@
       <button class="close-btn" @click="closeTrailer">Close</button>
     </div>
 
+    <!-- Review Form -->
+    <div v-if="showReviewForm" class="review-form">
+      <h3>Leave a Review</h3>
+
+      <!-- Star Rating System -->
+      <div class="star-rating">
+        <span
+          v-for="i in 10"
+          :key="i"
+          :class="{'filled': i <= review.rating}"
+          @click="setRating(i)"
+          class="star"
+        >&#9733;</span>
+      </div>
+
+      <textarea v-model="review.note" placeholder="Write your review here..."></textarea>
+
+      <!-- Error Message -->
+      <p v-if="ratingError" style="color: red;">Please select a rating between 1 and 10.</p>
+
+      <button @click="saveReview" class="review-btn">Submit Review</button>
+    </div>
+
     <div class="action-buttons">
-      <button @click="addToWatched">Watched</button>
+      <button @click="handleWatchedClick" class="watched-btn">Watched</button>
       <button @click="addToWantToWatch">Want to Watch</button>
     </div>
 
@@ -64,31 +87,31 @@
 <script setup>
 import { onMounted, ref, computed } from 'vue'
 import { useRoute } from 'vue-router'
-
-// Import Firebase functions
 import { getAuth } from 'firebase/auth'
 import { doc, getDoc, updateDoc } from 'firebase/firestore'
-import { db } from '../firebase' // Make sure you have the Firebase config properly set up
-
-const API_KEY = import.meta.env.VITE_TMDB_API_KEY
-const BASE_URL = 'https://api.themoviedb.org/3'
-const IMAGE_BASE_URL = 'https://image.tmdb.org/t/p/w500'
+import { db } from '../firebase'
 
 const route = useRoute()
 const movie = ref(null)
 const trailerUrl = ref(null)
 const recommendedMovies = ref([])
 
+// Control the visibility of the review form
+const showReviewForm = ref(false)
+const review = ref({
+  rating: 0,
+  note: '',
+})
+const ratingError = ref(false)
+
 onMounted(async () => {
   const id = route.params.id
-  // Fetch movie details
   try {
-    const res = await fetch(`${BASE_URL}/movie/${id}?api_key=${API_KEY}`)
+    const res = await fetch(`https://api.themoviedb.org/3/movie/${id}?api_key=${import.meta.env.VITE_TMDB_API_KEY}`)
     const data = await res.json()
     movie.value = data
 
-    // Fetch recommended movies
-    const recRes = await fetch(`${BASE_URL}/movie/${id}/similar?api_key=${API_KEY}`)
+    const recRes = await fetch(`https://api.themoviedb.org/3/movie/${id}/similar?api_key=${import.meta.env.VITE_TMDB_API_KEY}`)
     const recData = await recRes.json()
     recommendedMovies.value = recData.results
   } catch (error) {
@@ -96,36 +119,65 @@ onMounted(async () => {
   }
 })
 
-// Function to add movie to the "watched" list
-const addToWatched = async () => {
+// Handle adding to the watched list
+const handleWatchedClick = () => {
+  showReviewForm.value = true  // Show the review form when "Watched" is clicked
+}
+
+const saveReview = async () => {
+  if (review.rating < 1 || review.rating > 10) {
+    ratingError.value = true
+    return
+  }
+
   const user = getAuth().currentUser
   if (user) {
     const userRef = doc(db, 'users', user.uid)
     const docSnap = await getDoc(userRef)
     let watchedList = docSnap.exists() ? docSnap.data().watched || [] : []
 
-    // Add only essential details to watched list
     const movieData = {
       id: movie.value.id,
       title: movie.value.title,
       poster_path: movie.value.poster_path,
       release_date: movie.value.release_date,
-      overview: movie.value.overview,
+      review: {
+        rating: review.value.rating,
+        note: review.value.note,
+      },
     }
 
-    // Avoid adding duplicates
     if (!watchedList.find((m) => m.id === movie.value.id)) {
       watchedList.push(movieData)
       await updateDoc(userRef, {
         watched: watchedList,
       })
-      console.log('Movie added to watched list!')
+      showReviewForm.value = false  // Close the review form
+      console.log('Movie and review added to watched list!')
     } else {
       alert('Movie already in Watched list!')
     }
   }
 }
 
+// Set rating when a star is clicked
+const setRating = (rating) => {
+  review.value.rating = rating
+  ratingError.value = false  // Reset error message
+}
+
+// Fetch movie poster image
+const getImageUrl = (path) => {
+  return path ? `https://image.tmdb.org/t/p/w500${path}` : 'https://via.placeholder.com/150x225?text=No+Image'
+}
+
+const posterUrl = computed(() =>
+  movie.value?.poster_path ? `https://image.tmdb.org/t/p/w500${movie.value.poster_path}` : '',
+)
+
+const closeTrailer = () => {
+  trailerUrl.value = null
+}
 const addToWantToWatch = async () => {
   const user = getAuth().currentUser
   if (user) {
@@ -152,50 +204,6 @@ const addToWantToWatch = async () => {
   }
 }
 
-// Helper function to get image URL
-const getImageUrl = (path) => {
-  return path ? `${IMAGE_BASE_URL}${path}` : 'https://via.placeholder.com/150x225?text=No+Image'
-}
-
-const posterUrl = computed(() =>
-  movie.value?.poster_path ? `${IMAGE_BASE_URL}${movie.value.poster_path}` : '',
-)
-
-// Function to show trailer video
-const showTrailer = async () => {
-  const id = route.params.id
-  // Fetch trailer video data using the movie ID
-  const trailerRes = await fetch(`${BASE_URL}/movie/${id}/videos?api_key=${API_KEY}`)
-  const trailerData = await trailerRes.json()
-
-  // Check if the trailer is available and get the YouTube video key
-  if (trailerData.results && trailerData.results.length > 0) {
-    // Try to find a YouTube video with type "Trailer"
-    const trailer =
-      trailerData.results.find(
-        (video) =>
-          video.type === 'Trailer' &&
-          video.site === 'YouTube' &&
-          video.name.toLowerCase().includes('official'),
-      ) || trailerData.results.find((video) => video.type === 'Trailer' && video.site === 'YouTube') // fallback to any trailer
-
-    if (trailer) {
-      trailerUrl.value = `https://www.youtube.com/embed/${trailer.key}`
-    } else {
-      trailerUrl.value = null
-      alert('Official trailer not available for this movie.')
-    }
-  } else {
-    trailerUrl.value = null
-    alert('Trailer not available for this movie.')
-  }
-}
-
-const closeTrailer = () => {
-  trailerUrl.value = null
-}
-
-// Computed property to format duration into hours and minutes
 const formattedDuration = computed(() => {
   const duration = movie.value?.runtime
   if (duration) {
@@ -203,7 +211,7 @@ const formattedDuration = computed(() => {
     const minutes = duration % 60
     return `${hours}h ${minutes}m`
   }
-  return 'N/A' // If runtime is not available
+  return 'N/A'
 })
 
 const starRating = computed(() => {
@@ -345,5 +353,45 @@ button:hover {
   font-size: 1.2rem;
   color: #f5c518;
   margin-left: 10px;
+}
+
+/* Review form styles */
+.review-form {
+  margin-top: 20px;
+}
+
+.review-form input,
+.review-form select,
+.review-form textarea {
+  width: 100%;
+  padding: 8px;
+  margin-bottom: 10px;
+}
+
+.review-form button {
+  padding: 10px 20px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+.review-form button:hover {
+  background-color: #0056b3;
+}
+
+/* Star Rating Styles */
+.star-rating {
+  font-size: 2rem;
+  cursor: pointer;
+}
+
+.star {
+  color: gray;
+  margin-right: 5px;
+}
+
+.star.filled {
+  color: gold;
 }
 </style>
