@@ -1,4 +1,4 @@
-const API_KEY = '6a41baf9538b3f240c693edabc9e612f' //MAKE SURE TO ADD UR OWN API KEY
+const API_KEY = import.meta.env.VITE_TMDB_API_KEY//MAKE SURE TO ADD UR OWN API KEY
 const BASE_URL = 'https://api.themoviedb.org/3'
 
 export const searchMovies = async (query) => {
