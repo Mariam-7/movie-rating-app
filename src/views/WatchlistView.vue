@@ -1,23 +1,23 @@
 <template>
   <div class="watchlist-view">
     <h1>Your Want to Watch List</h1>
-
     <div v-if="wantToWatchMovies.length === 0" class="no-movies">
       <p>Start adding some movies!</p>
     </div>
-
+    
     <div v-else class="movie-list">
       <div v-for="movie in wantToWatchMovies" :key="movie.id" class="movie-item">
-        <img :src="getImageUrl(movie.poster_path)" alt="Movie Poster" />
-        <div class="movie-info">
+        <router-link :to="`/movie/${movie.id}`" class="movie-link">
+          <img :src="getImageUrl(movie.poster_path)" alt="Movie Poster" width="150" />
           <h3>{{ movie.title }}</h3>
-          <p>{{ movie.overview }}</p>
-          <button @click="removeFromWantToWatch(movie.id)" class="remove-btn">Remove Movie</button>
-        </div>
+        </router-link>
+        <p>{{ movie.overview }}</p>
+        <button @click="removeFromWantToWatch(movie.id)" class="remove-btn">Remove Movie</button>
       </div>
     </div>
   </div>
 </template>
+
 
 <script setup>
 import { ref, onMounted } from 'vue'
