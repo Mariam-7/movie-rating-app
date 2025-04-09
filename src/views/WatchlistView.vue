@@ -1,10 +1,10 @@
 <template>
   <div class="watchlist-view">
-    <h1>Your Want to Watch List</h1>
+    <h1>Your Watch List</h1>
     <div v-if="wantToWatchMovies.length === 0" class="no-movies">
       <p>Start adding some movies!</p>
     </div>
-    
+
     <div v-else class="movie-list">
       <div v-for="movie in wantToWatchMovies" :key="movie.id" class="movie-item">
         <router-link :to="`/movie/${movie.id}`" class="movie-link">
@@ -18,7 +18,6 @@
   </div>
 </template>
 
-
 <script setup>
 import { ref, onMounted } from 'vue'
 import { getAuth } from 'firebase/auth'
@@ -28,46 +27,48 @@ import { db } from '../firebase'
 const wantToWatchMovies = ref([])
 
 onMounted(async () => {
-  const user = getAuth().currentUser;
+  const user = getAuth().currentUser
   if (user) {
     try {
-      const userRef = doc(db, 'users', user.uid);
-      const docSnap = await getDoc(userRef);
+      const userRef = doc(db, 'users', user.uid)
+      const docSnap = await getDoc(userRef)
       if (docSnap.exists()) {
-        wantToWatchMovies.value = docSnap.data().watchlist || [];
+        wantToWatchMovies.value = docSnap.data().watchlist || []
       } else {
-        console.log('No want to watch movies found for this user');
+        console.log('No want to watch movies found for this user')
       }
     } catch (error) {
-      console.error('Error fetching want to watch movies:', error);
+      console.error('Error fetching want to watch movies:', error)
     }
   } else {
-    console.log('User not logged in');
+    console.log('User not logged in')
   }
 })
 
 const getImageUrl = (path) => {
-  return path ? `https://image.tmdb.org/t/p/w500${path}` : 'https://via.placeholder.com/150x225?text=No+Image';
+  return path
+    ? `https://image.tmdb.org/t/p/w500${path}`
+    : 'https://via.placeholder.com/150x225?text=No+Image'
 }
 
 const removeFromWantToWatch = async (movieId) => {
-  const updatedList = wantToWatchMovies.value.filter(movie => movie.id !== movieId);
-  wantToWatchMovies.value = updatedList; 
-  const user = getAuth().currentUser;
-  
+  const updatedList = wantToWatchMovies.value.filter((movie) => movie.id !== movieId)
+  wantToWatchMovies.value = updatedList
+  const user = getAuth().currentUser
+
   if (user) {
     try {
-      const userRef = doc(db, 'users', user.uid);
+      const userRef = doc(db, 'users', user.uid)
       await updateDoc(userRef, {
         watchlist: updatedList,
-      });
-      console.log('Movie removed from Want to Watch list in Firestore!');
+      })
+      console.log('Movie removed from Want to Watch list in Firestore!')
     } catch (error) {
-      console.error('Error removing movie from want to watch list:', error);
+      console.error('Error removing movie from want to watch list:', error)
     }
-  }  alert('Movie removed from Want to Watch list!'); }
-
-
+  }
+  alert('Movie removed from Want to Watch list!')
+}
 </script>
 
 <style scoped>

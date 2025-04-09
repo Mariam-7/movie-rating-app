@@ -98,11 +98,11 @@ onMounted(async () => {
 
 // Function to add movie to the "watched" list
 const addToWatched = async () => {
-  const user = getAuth().currentUser;
+  const user = getAuth().currentUser
   if (user) {
-    const userRef = doc(db, 'users', user.uid);
-    const docSnap = await getDoc(userRef);
-    let watchedList = docSnap.exists() ? docSnap.data().watched || [] : [];
+    const userRef = doc(db, 'users', user.uid)
+    const docSnap = await getDoc(userRef)
+    let watchedList = docSnap.exists() ? docSnap.data().watched || [] : []
 
     // Add only essential details to watched list
     const movieData = {
@@ -111,47 +111,46 @@ const addToWatched = async () => {
       poster_path: movie.value.poster_path,
       release_date: movie.value.release_date,
       overview: movie.value.overview,
-    };
+    }
 
     // Avoid adding duplicates
-    if (!watchedList.find(m => m.id === movie.value.id)) {
-      watchedList.push(movieData);
+    if (!watchedList.find((m) => m.id === movie.value.id)) {
+      watchedList.push(movieData)
       await updateDoc(userRef, {
         watched: watchedList,
-      });
-      console.log('Movie added to watched list!');
+      })
+      console.log('Movie added to watched list!')
     } else {
-      alert('Movie already in Watched list!');
+      alert('Movie already in Watched list!')
     }
   }
 }
 
-  const addToWantToWatch = async () => {
-  const user = getAuth().currentUser;
-    if (user) {
-        const userRef = doc(db, 'users', user.uid);
-        const docSnap = await getDoc(userRef);
-        let wantToWatchList = docSnap.exists() ? docSnap.data().watchlist || [] : [];
+const addToWantToWatch = async () => {
+  const user = getAuth().currentUser
+  if (user) {
+    const userRef = doc(db, 'users', user.uid)
+    const docSnap = await getDoc(userRef)
+    let wantToWatchList = docSnap.exists() ? docSnap.data().watchlist || [] : []
 
-        const movieData = {
-        id: movie.value.id,
-        title: movie.value.title,
-        poster_path: movie.value.poster_path,
-        release_date: movie.value.release_date,
-        overview: movie.value.overview,
-        };
-        if (!wantToWatchList.find(m => m.id === movie.value.id)) {
-        wantToWatchList.push(movieData);
-        await updateDoc(userRef, {
-            watchlist: wantToWatchList,
-        });
-        console.log('Movie added to Want to Watch list!');
-        } else {
-        alert('Movie already in Want to Watch list!');
-        }
+    const movieData = {
+      id: movie.value.id,
+      title: movie.value.title,
+      poster_path: movie.value.poster_path,
+      release_date: movie.value.release_date,
+      overview: movie.value.overview,
     }
+    if (!wantToWatchList.find((m) => m.id === movie.value.id)) {
+      wantToWatchList.push(movieData)
+      await updateDoc(userRef, {
+        watchlist: wantToWatchList,
+      })
+      console.log('Movie added to Want to Watch list!')
+    } else {
+      alert('Movie already in Want to Watch list!')
     }
-
+  }
+}
 
 // Helper function to get image URL
 const getImageUrl = (path) => {
@@ -171,7 +170,21 @@ const showTrailer = async () => {
 
   // Check if the trailer is available and get the YouTube video key
   if (trailerData.results && trailerData.results.length > 0) {
-    trailerUrl.value = `https://www.youtube.com/embed/${trailerData.results[0].key}`
+    // Try to find a YouTube video with type "Trailer"
+    const trailer =
+      trailerData.results.find(
+        (video) =>
+          video.type === 'Trailer' &&
+          video.site === 'YouTube' &&
+          video.name.toLowerCase().includes('official'),
+      ) || trailerData.results.find((video) => video.type === 'Trailer' && video.site === 'YouTube') // fallback to any trailer
+
+    if (trailer) {
+      trailerUrl.value = `https://www.youtube.com/embed/${trailer.key}`
+    } else {
+      trailerUrl.value = null
+      alert('Official trailer not available for this movie.')
+    }
   } else {
     trailerUrl.value = null
     alert('Trailer not available for this movie.')
@@ -198,7 +211,6 @@ const starRating = computed(() => {
   return '★'.repeat(ratingOutOfFive) + '☆'.repeat(5 - ratingOutOfFive)
 })
 </script>
-
 
 <style scoped>
 .movie-details {
