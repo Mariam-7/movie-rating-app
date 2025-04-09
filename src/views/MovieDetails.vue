@@ -114,7 +114,7 @@ const closeTrailer = () => {
   trailerUrl.value = null
 }
   const addToWatched = () => {
-    const watchedList = JSON.parse(localStorage.getItem('watched')) 
+    const watchedList = JSON.parse(localStorage.getItem('watched')) || [] 
     if (!watchedList.find(m => m.id === movie.value.id)) {
         watchedList.push(movie.value)
         localStorage.setItem('watched', JSON.stringify(watchedList))
@@ -123,7 +123,7 @@ const closeTrailer = () => {
   }}
 
   const addToWantToWatch = () => {
-    const wantToWatchList = JSON.parse(localStorage.getItem('wantToWatch'))
+    const wantToWatchList = JSON.parse(localStorage.getItem('wantToWatch')) || []
     if (!wantToWatchList.find(m => m.id === movie.value.id)) {
         wantToWatchList.push(movie.value)
         localStorage.setItem('wantToWatch', JSON.stringify(wantToWatchList))
