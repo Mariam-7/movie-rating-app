@@ -1,8 +1,20 @@
 <template>
-  <div v-if="movie">
-    <h1>{{ movie.title }}</h1>
-    <img :src="posterUrl" alt="Movie Poster" class="movie-poster" />
-    <button @click="showTrailer">Watch Trailer</button>
+  <div v-if="movie" class="movie-details">
+    <div class="movie-container">
+      <!-- Movie Cover Image -->
+      <div class="movie-cover">
+        <img :src="posterUrl" alt="Movie Poster" class="movie-poster" />
+      </div>
+
+      <!-- Movie Details -->
+      <div class="movie-info">
+        <h1>{{ movie.title }}</h1>
+        <p><strong>Release Date:</strong> {{ movie.release_date }}</p>
+        <p><strong>Rating:</strong> {{ movie.vote_average }}/10</p>
+        <p>{{ movie.overview }}</p>
+        <button @click="showTrailer" class="trailer-btn">Watch Trailer</button>
+      </div>
+    </div>
 
     <!-- Trailer Video -->
     <div v-if="trailerUrl" class="video-container">
@@ -14,10 +26,6 @@
       ></iframe>
       <button class="close-btn" @click="closeTrailer">Close</button>
     </div>
-
-    <p>{{ movie.overview }}</p>
-    <p><strong>Release Date:</strong> {{ movie.release_date }}</p>
-    <p><strong>Rating:</strong> {{ movie.vote_average }}/10</p>
   </div>
 </template>
 
@@ -66,12 +74,52 @@ const closeTrailer = () => {
 </script>
 
 <style scoped>
+.movie-details {
+  padding: 20px;
+}
+
+.movie-container {
+  display: flex;
+  flex-wrap: wrap; /* Allows wrapping for smaller screens */
+  gap: 20px;
+  justify-content: flex-start;
+}
+
+.movie-cover {
+  flex: 1 1 200px; /* Flex: grow, shrink, basis - makes image flexible */
+  max-width: 250px; /* Limit image size */
+}
+
 .movie-poster {
   width: 100%;
-  max-width: 200px; /* Maximum width */
   height: auto;
   object-fit: cover;
-  margin-bottom: 20px;
+}
+
+.movie-info {
+  flex: 2 1 400px; /* More space for movie details */
+  padding: 10px;
+}
+
+.movie-info h1 {
+  font-size: 2rem;
+  margin-bottom: 15px;
+}
+
+.movie-info p {
+  margin-bottom: 10px;
+}
+
+.trailer-btn {
+  padding: 10px 20px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+.trailer-btn:hover {
+  background-color: #0056b3;
 }
 
 .video-container {
@@ -110,5 +158,20 @@ button:hover {
 
 .close-btn:hover {
   background-color: #c82333;
+}
+
+/* Responsive Design for smaller screens */
+@media (max-width: 768px) {
+  .movie-container {
+    flex-direction: column; /* Stack the image and info vertically */
+  }
+
+  .movie-cover {
+    max-width: 100%; /* Make image take full width on small screens */
+  }
+
+  .movie-info {
+    padding: 15px;
+  }
 }
 </style>

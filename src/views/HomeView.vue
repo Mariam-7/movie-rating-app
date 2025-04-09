@@ -70,3 +70,51 @@ export default {
   },
 }
 </script>
+
+<style scoped>
+.movie-carousel {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  justify-content: center;
+}
+
+.movie-card {
+  width: 150px;
+  text-align: center;
+}
+
+.movie-card a {
+  text-decoration: none;
+  color: inherit;
+}
+
+.movie-card h3 {
+  margin-top: 10px;
+  font-size: 16px;
+}
+
+img {
+  width: 100%;
+  height: auto;
+}
+
+.search-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.logout-btn {
+  padding: 10px 20px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+.logout-btn:hover {
+  background-color: #0056b3;
+}
+</style>
