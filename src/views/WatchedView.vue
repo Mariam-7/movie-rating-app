@@ -1,4 +1,4 @@
-import RatingBarChart from '../components/RatingBarChart.vue'
+import RatingD3Chart from '../components/RatingD3Chart.vue'
 const showGraph = ref(false)
 const ratingData = computed(() => watchedMovies.value.map(movie => movie.review?.rating))
 
@@ -18,7 +18,7 @@ const ratingData = computed(() => watchedMovies.value.map(movie => movie.review?
     </button>
 
     <div v-if="showGraph" style="margin-bottom: 30px;">
-      <RatingBarChart :ratings="ratingData" />
+      <RatingD3Chart :ratings="ratingData" />
     </div>
 
     <!-- Display movies if watchedMovies is populated -->
@@ -65,7 +65,7 @@ import { ref, onMounted, computed } from 'vue'
 import { getAuth } from 'firebase/auth'
 import { doc, getDoc, updateDoc } from 'firebase/firestore'
 import { db } from '../firebase'
-import RatingBarChart from '../components/RatingBarChart.vue' // <-- this was outside before
+import RatingD3Chart from '../components/RatingD3Chart.vue' // <-- this was outside before
 
 const watchedMovies = ref([])
 const showGraph = ref(false) // <-- added
