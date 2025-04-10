@@ -23,7 +23,7 @@ const ratingData = computed(() => watchedMovies.value.map(movie => movie.review?
         <div class="media">
           <figure class="media-left">
             <router-link :to="`/movie/${movie.id}`" class="image is-96x128">
-              <img :src="getImageUrl(movie.poster_path)" alt="Movie Poster" />
+              <img :src="getImageUrl(movie.poster_path)" alt="Movie Poster" class="movie-poster" />
             </router-link>
           </figure>
 
@@ -81,10 +81,10 @@ import { ref, onMounted, computed } from 'vue'
 import { getAuth } from 'firebase/auth'
 import { doc, getDoc, updateDoc } from 'firebase/firestore'
 import { db } from '../firebase'
-import RatingD3Chart from '../components/RatingD3Chart.vue' 
+import RatingD3Chart from '../components/RatingD3Chart.vue'
 
 const watchedMovies = ref([])
-const showGraph = ref(false) 
+const showGraph = ref(false)
 const ratingData = computed(() => watchedMovies.value.map(movie => movie.review?.rating))
 
 // Fetch watched movies from Firestore
@@ -167,7 +167,7 @@ const removeFromWatched = async (movieId) => {
 
 // Generate star rating HTML for display
 const generateStarRating = (rating) => {
-  if (!rating) return ''; 
+  if (!rating) return '';
 
   let stars = '';
   for (let i = 1; i <= 10; i++) {
@@ -207,5 +207,10 @@ const generateStarRating = (rating) => {
 
 .star:hover {
   color: #ffaa00;
+}
+.movie-poster {
+  max-width: 96px;
+  max-height: 128px;
+  object-fit: cover;
 }
 </style>
