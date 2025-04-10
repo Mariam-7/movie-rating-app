@@ -6,15 +6,16 @@ import WatchlistView from '../views/WatchlistView.vue'
 import WatchedView from '../views/WatchedView.vue'
 import AboutView from '../views/AboutView.vue'
 import MovieDetails from '../views/MovieDetails.vue'
-
+import Settings from '@/views/Settings.vue'
 const routes = [
   { path: '/', redirect: '/login' },
   { path: '/login', name: 'login', component: LoginView },
   { path: '/signup', name: 'signup', component: SignUpView },
-  { path: '/home', name: 'home', component: HomeView },
+  { path: '/home', name: 'HomeView', component: HomeView },
   { path: '/watchlist', name: 'watchlist', component: WatchlistView },
   { path: '/watched', name: 'watched', component: WatchedView },
   { path: '/about', name: 'about', component: AboutView },
+  { path: '/settings', name: 'Settings', component: Settings },
   { path: '/movie/:id', name: 'MovieDetails', component: MovieDetails, props: true },
 ]
 

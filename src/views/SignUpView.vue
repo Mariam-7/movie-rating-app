@@ -4,6 +4,7 @@
       <h1>Create an Account</h1>
       <form @submit.prevent="handleSignup">
         <input v-model="email" type="email" placeholder="Email" required />
+        <input v-model="username" type="username" placeholder="Username" required />
         <input v-model="password" type="password" placeholder="Password" required />
         <button type="submit" :disabled="loading">
           {{ loading ? 'Creating account...' : 'Sign Up' }}
@@ -31,6 +32,7 @@ import { doc, setDoc } from 'firebase/firestore'
 import { auth, db } from '@/firebase'
 
 const email = ref('')
+const username = ref('')
 const password = ref('')
 const error = ref('')
 const success = ref('')
@@ -45,7 +47,7 @@ const handleSignup = async () => {
 
   try {
     // Input validation
-    if (!email.value || !password.value) {
+    if (!email.value || !password.value || !username.value) {
       throw new Error('Email and password are required')
     }
     if (password.value.length < 6) {
@@ -56,11 +58,13 @@ const handleSignup = async () => {
     const userCredential = await createUserWithEmailAndPassword(
       auth,
       email.value.trim(),
+      username.value.trim(),
       password.value.trim()
     )
     
     await setDoc(doc(db, "users", userCredential.user.uid), {
       email: email.value.trim(),
+      username: username.value.trim(),
       watchlist: [],
       rated_movies: [],
       created_at: new Date()

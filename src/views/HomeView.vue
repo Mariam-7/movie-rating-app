@@ -4,7 +4,7 @@
       <div class="box">
         <div class="level">
           <div class="level-left">
-            <h1 class="title">Welcome back, {{ userEmail }}!</h1>
+            <h1 class="title">Welcome back, {{ username }}!</h1>
           </div>
           <div class="level-right">
             <button @click="handleLogout" class="button is-danger">Logout</button>
@@ -51,7 +51,6 @@
   </section>
 </template>
 
-
 <script>
 import { searchMovies, getImageUrl, getPopularMovies } from '../MovieService'
 import { auth } from '@/firebase'
@@ -62,17 +61,18 @@ export default {
     return {
       query: '',
       movies: [],
-      userEmail: 'Guest', // Default value
+      username: 'Guest', // Default value
     }
   },
 
   async mounted() {
     const user = auth.currentUser
 
-    if (user && user.email) {
-      this.userEmail = user.email
+    if (user) {
+      // Fetch the username from Firebase Authentication
+      this.username = user.displayName || user.email || 'Guest' // Use displayName first, else email
     } else {
-      this.userEmail = 'Guest'
+      this.username = 'Guest'
     }
 
     // Load popular movies using MovieService

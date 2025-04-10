@@ -9,13 +9,16 @@
           {{ loading ? 'Logging in...' : 'Login' }}
         </button>
         <p class="error" v-if="error">{{ error }}</p>
-        <p v-if="showReset" @click="handleReset" class="reset-link">
+
+        <!-- Forgot password link always visible -->
+        <p class="reset-link" @click="handleReset">
           Forgot password?
         </p>
+
         <p class="footer-text">
-        Don't have an account?
-        <router-link to="/signup" class="link-accent">Sign up</router-link>
-      </p>
+          Don't have an account?
+          <router-link to="/signup" class="link-accent">Sign up</router-link>
+        </p>
       </form>
     </div>
   </div>
@@ -34,12 +37,12 @@ import { auth } from '@/firebase'
 const email = ref('')
 const password = ref('')
 const error = ref('')
-const success = ref('') // Added missing success ref
+const success = ref('')
 const loading = ref(false)
-const showReset = ref(false)
+const resetTime = ref(null) // Store the time of last reset request
 const router = useRouter()
 
-// Methods
+const RESET_TIMEOUT = 10000;
 
 const handleLogin = async () => {
   error.value = ''
@@ -70,23 +73,34 @@ const handleLogin = async () => {
   }
 }
 
-// 3. Password reset handler
+// Password reset handler with time check
 const handleReset = async () => {
+  // Check if 5 minutes have passed since the last request
+  const currentTime = new Date().getTime();
+  
+  if (resetTime.value && currentTime - resetTime.value < RESET_TIMEOUT) {
+    const timeLeft = (RESET_TIMEOUT - (currentTime - resetTime.value)) / 1000;
+    error.value = `You can request another link in ${Math.ceil(timeLeft)} seconds.`;
+    return;
+  }
+  
   if (!email.value) {
-    error.value = 'Please enter your email first'
-    return
+    error.value = 'Please enter your email first';
+    return;
   }
   
   try {
     await sendPasswordResetEmail(auth, email.value.trim())
     error.value = 'Password reset email sent. Check your inbox.'
-    showReset.value = false
+    
+    // Store the current time to prevent multiple requests within 5 minutes
+    resetTime.value = currentTime;
   } catch (err) {
     error.value = getLoginError(err.code)
   }
 }
 
-// 4. Error handling helper
+// Error handling helper
 const handleLoginError = (err) => {
   console.error('Login error:', err.code)
   
@@ -94,14 +108,13 @@ const handleLoginError = (err) => {
     case 'auth/user-not-found':
     case 'auth/wrong-password':
       error.value = 'Invalid email or password'
-      showReset.value = true
       break
     default:
       error.value = getLoginError(err.code)
   }
 }
 
-// 5. Error message mapper
+// Error message mapper
 const getLoginError = (code) => {
   const errors = {
     'auth/invalid-email': 'Invalid email format',

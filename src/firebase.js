@@ -24,6 +24,7 @@ export const initAuth = (callback) => {
           doc(db, 'users', user.uid),
           {
             email: user.email,
+            // username: user.username,
             watchlist: [],
             rated_movies: [],
             last_login: new Date(),

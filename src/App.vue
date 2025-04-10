@@ -8,6 +8,8 @@
         <li><RouterLink to="/watched">Watched</RouterLink></li>
         <li><RouterLink to="/watchlist">Watchlist</RouterLink></li>
         <li><RouterLink to="/about">About Us</RouterLink></li>
+        <li><RouterLink to="/Settings">Settings</RouterLink></li>
+        
       </ul>
     </aside>
 

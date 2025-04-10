@@ -27,7 +27,7 @@
           <div class="buttons mt-4">
             <button @click="showTrailer" class="button">Watch Trailer</button>
             <button @click="handleWatchedClick" class="button">Watched</button>
-            <button @click="addToWantToWatch" class="button">Want to Watch</button>
+            <button @click="addToWantToWatch" class="button is-info mt-3">Add to Wsaatchlist</button>
           </div>
         </div>
       </div>
@@ -95,7 +95,7 @@
   <script setup>
   import { onMounted, ref, computed } from 'vue'
   import { useRoute, useRouter } from 'vue-router'
-  import { getAuth } from 'firebase/auth'
+  import { getAuth, onAuthStateChanged } from 'firebase/auth' // <-- Correct import here
   import { doc, getDoc, updateDoc } from 'firebase/firestore'
   import { db } from '../firebase'
   const router = useRouter(); // <-- Initialize the router
@@ -107,7 +107,7 @@
   const movie = ref(null)
   const trailerUrl = ref(null)
   const recommendedMovies = ref([])
-  
+  const watchedMovies = ref([])
   // Control the visibility of the review form
   const showReviewForm = ref(false)
   const review = ref({
@@ -128,7 +128,17 @@
       console.error('Error fetching movie details or recommendations:', error)
     }
   })
-  
+  onMounted(async () => {
+  onAuthStateChanged(getAuth(), async (user) => {
+    if (user) {
+      console.log('User is logged in, fetching watchlist data...')
+      await fetchWatchlist(user)
+    } else {
+      console.log('User is not logged in.')
+    }
+  })
+})
+
   // Handle adding to the watched list
   const handleWatchedClick = () => {
     showReviewForm.value = true // Show the review form when "Watched" is clicked
@@ -170,6 +180,36 @@
       }
     }
   }
+  const addToWantToWatch = async () => {
+  const user = getAuth().currentUser; // Get the current user
+  if (user) {
+    const userRef = doc(db, 'users', user.uid); // Reference to the user's document
+    const docSnap = await getDoc(userRef); // Fetch the user data
+
+    let watchList = docSnap.exists() ? docSnap.data().watchList || [] : []; // Get existing watchlist or initialize an empty array
+
+    const movieData = {
+      id: movie.value.id,
+      title: movie.value.title,
+      poster_path: movie.value.poster_path,
+      release_date: movie.value.release_date,
+      added_date: new Date().toISOString(), // Store the added date
+    };
+
+    // Check if the movie already exists in the watchlist to avoid duplicates
+    if (!watchList.some((m) => m.id === movie.value.id)) {
+      watchList.push(movieData); // Add the movie to the list
+      try {
+        await updateDoc(userRef, { watchList }); // Update the watchlist in Firestore (note the correct field name)
+        console.log('Movie added to watchlist!');
+      } catch (error) {
+        console.error('Error adding movie to watchlist:', error);
+      }
+    } else {
+      console.log('Movie already in watchlist!');
+    }
+  }
+};
   
   // Set rating when a star is clicked
   const setRating = (rating) => {
@@ -219,32 +259,21 @@
   const closeTrailer = () => {
     trailerUrl.value = null
   }
-  
-  const addToWantToWatch = async () => {
-    const user = getAuth().currentUser
-    if (user) {
-      const userRef = doc(db, 'users', user.uid)
-      const docSnap = await getDoc(userRef)
-      let wantToWatchList = docSnap.exists() ? docSnap.data().watchlist || [] : []
-  
-      const movieData = {
-        id: movie.value.id,
-        title: movie.value.title,
-        poster_path: movie.value.poster_path,
-        release_date: movie.value.release_date,
-        added_date: new Date().toISOString(), // Add date when the movie is added
-      }
-      if (!wantToWatchList.find((m) => m.id === movie.value.id)) {
-        wantToWatchList.push(movieData)
-        await updateDoc(userRef, {
-          watchlist: wantToWatchList,
-        })
-        console.log('Movie added to Want to Watch list!')
-      } else {
-        alert('Movie already in Want to Watch list!')
-      }
+  const fetchWatchlist = async (user) => {
+  try {
+    const userRef = doc(db, 'users', user.uid)  // Refer to the user's document
+    const docSnap = await getDoc(userRef)
+
+    if (docSnap.exists()) {
+      watchedMovies.value = docSnap.data().watchlist || []  // Fetch the watchlist
+    } else {
+      console.log('No watchlist data found.')
     }
+  } catch (error) {
+    console.error('Error fetching watchlist:', error)
   }
+}
+
   
   const formattedDuration = computed(() => {
     const duration = movie.value?.runtime

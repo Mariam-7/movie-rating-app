@@ -37,50 +37,47 @@ import { getAuth } from 'firebase/auth'
 import { doc, getDoc, updateDoc } from 'firebase/firestore'
 import { db } from '../firebase'
 
-const wantToWatchMovies = ref([])
+const wantToWatchMovies = ref([]) // Initialize the watchlist movies
 
 onMounted(async () => {
-  const user = getAuth().currentUser
+  const user = getAuth().currentUser; // Get the current user
   if (user) {
     try {
-      const userRef = doc(db, 'users', user.uid)
-      const docSnap = await getDoc(userRef)
+      const userRef = doc(db, 'users', user.uid); // Reference to the user’s document in Firestore
+      const docSnap = await getDoc(userRef); // Fetch the document
       if (docSnap.exists()) {
-        wantToWatchMovies.value = docSnap.data().watchlist || []
+        wantToWatchMovies.value = docSnap.data().watchList || []; // Set the watchlist to the fetched data
       } else {
-        console.log('No want to watch movies found for this user')
+        console.log('No watchlist found for this user');
       }
     } catch (error) {
-      console.error('Error fetching want to watch movies:', error)
+      console.error('Error fetching watchlist data:', error);
     }
   } else {
-    console.log('User not logged in')
+    console.log('User is not logged in');
   }
-})
-
-const getImageUrl = (path) => {
-  return path
-    ? `https://image.tmdb.org/t/p/w500${path}`
-    : 'https://via.placeholder.com/150x225?text=No+Image'
-}
+});
 
 const removeFromWantToWatch = async (movieId) => {
-  const updatedList = wantToWatchMovies.value.filter((movie) => movie.id !== movieId)
-  wantToWatchMovies.value = updatedList
-  const user = getAuth().currentUser
+  const updatedList = wantToWatchMovies.value.filter((movie) => movie.id !== movieId); // Remove movie from list
+  wantToWatchMovies.value = updatedList; // Immediately update the UI
 
+  const user = getAuth().currentUser;
   if (user) {
     try {
-      const userRef = doc(db, 'users', user.uid)
-      await updateDoc(userRef, {
-        watchlist: updatedList,
-      })
-      console.log('Movie removed from Want to Watch list in Firestore!')
+      const userRef = doc(db, 'users', user.uid); // Reference to the user’s document in Firestore
+      await updateDoc(userRef, { watchList: updatedList }); // Update the watchlist field in Firestore
+      console.log('Movie removed from watchlist!');
     } catch (error) {
-      console.error('Error removing movie from want to watch list:', error)
+      console.error('Error removing movie from watchlist:', error);
     }
   }
-  alert('Movie removed from Want to Watch list!')
+};
+
+
+// Helper function to generate image URLs for movie posters
+const getImageUrl = (path) => {
+  return path ? `https://image.tmdb.org/t/p/w500${path}` : 'https://via.placeholder.com/150x225?text=No+Image'
 }
 </script>
 
