@@ -115,3 +115,12 @@ VITE_FIREBASE_PROJECT_ID=your-firebase-project-id-here
 2. **Add `.env` to `.gitignore`** to prevent it from being committed to version control.
 
 ---
+
+## Online Resources Used  
+[Vue Documentation](https://vuejs.org/guide/essentials/event-handling.html)      
+[TMDB API Documentation](https://developer.themoviedb.org/reference/account-details)      
+[Switching to Bulma](https://bulma.io/documentation/start/overview/)     
+[Bulma Documentation](https://github.com/jgthms/bulma/tree/main)  
+
+
+
