@@ -37,7 +37,7 @@ const ratingData = computed(() => watchedMovies.value.map(movie => movie.review?
               <p><strong>Rating:</strong> <span v-html="generateStarRating(movie.review.rating)"></span></p>
               <p><strong>Review:</strong> {{ movie.review.note || 'No review provided.' }}</p>
 
-              <button @click="editReview(movie)" class="button is-primary mt-2">Edit Review</button>
+              <button @click="editReview(movie)" class="button">Edit Review</button>
             </div>
 
             <div v-else>
