@@ -9,7 +9,6 @@
       <div class="dashboard">
         <div v-if="movies.length" class="movie-carousel">
           <div v-for="movie in movies" :key="movie.id" class="movie-card">
-            <!-- Wrap the content in a router-link to navigate to the movie details page -->
             <router-link :to="`/movie/${movie.id}`">
               <img :src="getImageUrl(movie.poster_path)" alt="Movie" width="150" />
               <h3>{{ movie.title }}</h3>
@@ -24,7 +23,7 @@
 
 <script>
 import { searchMovies, getImageUrl, getPopularMovies } from '../MovieService'
-import { auth } from '@/firebase' // Import Firebase auth
+import { auth } from '@/firebase'
 import { signOut } from 'firebase/auth'
 
 export default {
@@ -35,8 +34,8 @@ export default {
       userEmail: 'Guest', // Default value
     }
   },
+
   async mounted() {
-    // Get current user
     const user = auth.currentUser
 
     if (user && user.email) {
@@ -45,9 +44,10 @@ export default {
       this.userEmail = 'Guest'
     }
 
-    // Load popular movies
+    // Load popular movies using MovieService
     this.movies = await getPopularMovies()
   },
+
   methods: {
     async searchMovies() {
       if (this.query.length > 2) {
@@ -56,6 +56,7 @@ export default {
         this.movies = await getPopularMovies()
       }
     },
+
     async handleLogout() {
       try {
         await signOut(auth)
@@ -64,10 +65,11 @@ export default {
         console.error('Logout failed:', error)
       }
     },
+
     getImageUrl(path) {
       return path ? `https://image.tmdb.org/t/p/w500${path}` : 'https://via.placeholder.com/100x150'
-    },
-  },
+    }
+  }
 }
 </script>
 

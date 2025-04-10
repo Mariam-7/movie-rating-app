@@ -92,6 +92,9 @@ import { getAuth } from 'firebase/auth'
 import { doc, getDoc, updateDoc } from 'firebase/firestore'
 import { db } from '../firebase'
 
+// Import methods from MovieService.js
+import { getMovieDetails, getImageUrl, getPopularMovies, searchMovies } from '../MovieService'
+
 const route = useRoute()
 const movie = ref(null)
 const trailerUrl = ref(null)
@@ -108,17 +111,11 @@ const ratingError = ref(false)
 onMounted(async () => {
   const id = route.params.id
   try {
-    const res = await fetch(
-      `https://api.themoviedb.org/3/movie/${id}?api_key=${import.meta.env.VITE_TMDB_API_KEY}`,
-    )
-    const data = await res.json()
-    movie.value = data
+    // Use getMovieDetails from MovieService to fetch movie details
+    movie.value = await getMovieDetails(id)
 
-    const recRes = await fetch(
-      `https://api.themoviedb.org/3/movie/${id}/similar?api_key=${import.meta.env.VITE_TMDB_API_KEY}`,
-    )
-    const recData = await recRes.json()
-    recommendedMovies.value = recData.results
+    // Fetch recommended movies (you can create a method for that as well in the service)
+    recommendedMovies.value = await getPopularMovies()
   } catch (error) {
     console.error('Error fetching movie details or recommendations:', error)
   }
@@ -171,15 +168,9 @@ const setRating = (rating) => {
   ratingError.value = false // Reset error message
 }
 
-// Fetch movie poster image
-const getImageUrl = (path) => {
-  return path
-    ? `https://image.tmdb.org/t/p/w500${path}`
-    : 'https://via.placeholder.com/150x225?text=No+Image'
-}
-
+// Fetch movie poster image using the imported getImageUrl method
 const posterUrl = computed(() =>
-  movie.value?.poster_path ? `https://image.tmdb.org/t/p/w500${movie.value.poster_path}` : '',
+  movie.value?.poster_path ? getImageUrl(movie.value.poster_path) : '',
 )
 
 const showTrailer = async () => {
@@ -219,6 +210,7 @@ const showTrailer = async () => {
 const closeTrailer = () => {
   trailerUrl.value = null
 }
+
 const addToWantToWatch = async () => {
   const user = getAuth().currentUser
   if (user) {
@@ -260,6 +252,11 @@ const starRating = computed(() => {
   return '★'.repeat(ratingOutOfFive) + '☆'.repeat(5 - ratingOutOfFive)
 })
 </script>
+
+<style scoped>
+/* Your styles */
+</style>
+
 
 <style scoped>
 .movie-details {

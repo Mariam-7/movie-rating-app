@@ -1,8 +1,3 @@
-import RatingBarChart from '../components/RatingBarChart.vue'
-const showGraph = ref(false)
-const ratingData = computed(() => watchedMovies.value.map(movie => movie.review?.rating))
-
-
 <template>
   <div class="watched-view">
     <h1>Your Watched Movies</h1>
@@ -10,15 +5,6 @@ const ratingData = computed(() => watchedMovies.value.map(movie => movie.review?
     <!-- If no movies are watched, display a message -->
     <div v-if="watchedMovies.length === 0" class="no-movies">
       <p>Start adding some movies!</p>
-    </div>
-
-    <!-- Display rating bar graph toggle -->
-    <button @click="showGraph = !showGraph" class="edit-btn" style="margin-bottom: 20px;">
-      {{ showGraph ? 'Hide Rating Breakdown' : 'Show Rating Breakdown' }}
-    </button>
-
-    <div v-if="showGraph" style="margin-bottom: 30px;">
-      <RatingBarChart :ratings="ratingData" />
     </div>
 
     <!-- Display movies if watchedMovies is populated -->
@@ -41,10 +27,10 @@ const ratingData = computed(() => watchedMovies.value.map(movie => movie.review?
         <!-- Review edit form -->
         <div v-else>
           <div class="star-rating">
-            <span
-              v-for="star in 10"
-              :key="star"
-              @click="setRating(movie, star)"
+            <span 
+              v-for="star in 10" 
+              :key="star" 
+              @click="setRating(movie, star)" 
               :class="{'filled': movie.review.rating >= star}"
               class="star"
             >
@@ -61,17 +47,14 @@ const ratingData = computed(() => watchedMovies.value.map(movie => movie.review?
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted } from 'vue'
 import { getAuth } from 'firebase/auth'
 import { doc, getDoc, updateDoc } from 'firebase/firestore'
 import { db } from '../firebase'
-import RatingBarChart from '../components/RatingBarChart.vue' // <-- this was outside before
 
 const watchedMovies = ref([])
-const showGraph = ref(false) // <-- added
-const ratingData = computed(() => watchedMovies.value.map(movie => movie.review?.rating)) // <-- added
 
-// Fetch watched movies from Firestore
+// Fetch watched movies from Firestore when the component is mounted
 onMounted(async () => {
   const user = getAuth().currentUser;
   if (user) {
@@ -79,6 +62,7 @@ onMounted(async () => {
       const userRef = doc(db, 'users', user.uid);
       const docSnap = await getDoc(userRef);
       if (docSnap.exists()) {
+        // Load watched movies from Firestore (if any)
         watchedMovies.value = docSnap.data().watched || [];
       } else {
         console.log('No watched movies found for this user');
