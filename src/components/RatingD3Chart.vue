@@ -15,6 +15,11 @@ const props = defineProps({
 
 const chart = ref(null)
 let svg = null
+let observer = null
+
+const getTextColor = () => {
+  return document.documentElement.getAttribute('data-theme') === 'light' ? 'black' : 'white'
+}
 
 const drawChart = () => {
   const data = Array(10).fill(0)
@@ -35,12 +40,14 @@ const drawChart = () => {
     .attr('width', width)
     .attr('height', height)
 
+  const textColor = getTextColor()
+
   // Title
   svg.append('text')
     .attr('x', width / 2)
     .attr('y', margin.top - 20)
     .attr('text-anchor', 'middle')
-    .attr('fill', 'white')
+    .attr('fill', textColor)
     .attr('font-size', '18px')
     .text('Rating Distribution (%)')
 
@@ -57,11 +64,11 @@ const drawChart = () => {
   svg.append('g')
     .attr('transform', `translate(0, ${height - margin.bottom})`)
     .call(d3.axisBottom(x))
-    .call(g => g.selectAll('text').attr('fill', 'white'))
+    .call(g => g.selectAll('text').attr('fill', textColor))
     .append('text')
     .attr('x', width / 2)
     .attr('y', 35)
-    .attr('fill', 'white')
+    .attr('fill', textColor)
     .attr('text-anchor', 'middle')
     .text('Rating (Stars)')
 
@@ -69,19 +76,20 @@ const drawChart = () => {
   svg.append('g')
     .attr('transform', `translate(${margin.left}, 0)`)
     .call(d3.axisLeft(y))
-    .call(g => g.selectAll('text').attr('fill', 'white'))
+    .call(g => g.selectAll('text').attr('fill', textColor))
     .append('text')
     .attr('transform', 'rotate(-90)')
     .attr('x', -height / 2)
     .attr('y', -35)
-    .attr('fill', 'white')
+    .attr('fill', textColor)
     .attr('text-anchor', 'middle')
     .text('Percentage')
 
   // Bars
   svg.selectAll('rect')
     .data(percentages)
-    .enter()    .append('rect')
+    .enter()
+    .append('rect')
     .attr('x', (d, i) => x((i + 1).toString()))
     .attr('y', d => y(d))
     .attr('width', x.bandwidth())
@@ -89,11 +97,24 @@ const drawChart = () => {
     .attr('fill', '#0077ff')
 }
 
+onMounted(() => {
+  drawChart()
 
-onMounted(drawChart)
+  observer = new MutationObserver(() => {
+    drawChart()
+  })
+
+  observer.observe(document.documentElement, {
+    attributes: true,
+    attributeFilter: ['data-theme']
+  })
+})
+
 watch(() => props.ratings, drawChart)
+
 onBeforeUnmount(() => {
   d3.select(chart.value).selectAll('*').remove()
+  if (observer) observer.disconnect()
 })
 </script>
 
