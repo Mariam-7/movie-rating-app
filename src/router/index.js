@@ -11,7 +11,7 @@ const routes = [
   { path: '/', redirect: '/login' },
   { path: '/login', name: 'login', component: LoginView },
   { path: '/signup', name: 'signup', component: SignUpView },
-  { path: '/home', name: 'HomeView', component: HomeView },
+  { path: '/home', name: 'home', component: HomeView },
   { path: '/watchlist', name: 'watchlist', component: WatchlistView },
   { path: '/watched', name: 'watched', component: WatchedView },
   { path: '/about', name: 'about', component: AboutView },

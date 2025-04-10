@@ -1,4 +1,4 @@
-<template>
+<template>x
   <div class="auth-background">
     <div class="auth-box">
       <h1>Create an Account</h1>
@@ -70,7 +70,7 @@ const handleSignup = async () => {
     await sendEmailVerification(userCredential.user)
     
     success.value = 'Account created! Please verify your email.'
-    router.push('/HomeView')
+    router.push('/home')
 
   } catch (err) {
     console.error('Signup error:', err)
