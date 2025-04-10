@@ -2,75 +2,90 @@ import RatingD3Chart from '../components/RatingD3Chart.vue'
 const showGraph = ref(false)
 const ratingData = computed(() => watchedMovies.value.map(movie => movie.review?.rating))
 
-
 <template>
-  <div class="watched-view">
-    <h1>Your Watched Movies</h1>
+  <div class="watched-view section">
+    <h1 class="title is-3">Your Watched Movies</h1>
 
-    <!-- If no movies are watched, display a message -->
-    <div v-if="watchedMovies.length === 0" class="no-movies">
+    <div v-if="watchedMovies.length === 0">
       <p>Start adding some movies!</p>
     </div>
 
-    <!-- Display rating bar graph toggle -->
-    <button @click="showGraph = !showGraph" class="edit-btn" style="margin-bottom: 20px;">
+    <button @click="showGraph = !showGraph" class="button">
       {{ showGraph ? 'Hide Rating Breakdown' : 'Show Rating Breakdown' }}
     </button>
 
-    <div v-if="showGraph" style="margin-bottom: 30px;">
+    <div v-if="showGraph" class="mb-5">
       <RatingD3Chart :ratings="ratingData" />
     </div>
 
-    <!-- Display movies if watchedMovies is populated -->
-    <div v-else class="movie-list">
-      <div v-for="movie in watchedMovies" :key="movie.id" class="movie-item">
-        <router-link :to="`/movie/${movie.id}`" class="movie-link">
-          <img :src="getImageUrl(movie.poster_path)" alt="Movie Poster" width="150" />
-          <h3>{{ movie.title }}</h3>
-        </router-link>
+    <div v-else class="columns is-multiline">
+      <div v-for="movie in watchedMovies" :key="movie.id" class="column is-12 box">
+        <div class="media">
+          <figure class="media-left">
+            <router-link :to="`/movie/${movie.id}`" class="image is-96x128">
+              <img :src="getImageUrl(movie.poster_path)" alt="Movie Poster" />
+            </router-link>
+          </figure>
 
-        <!-- Display the review for the movie -->
-        <div v-if="!movie.isEditing">
-          <p><strong>Added on:</strong> {{ movie.added_date ? new Date(movie.added_date).toLocaleDateString() : 'N/A' }}</p>
-          <p><strong>Rating:</strong> <span v-html="generateStarRating(movie.review.rating)"></span></p>
-          <p><strong>Review:</strong> {{ movie.review.note || 'No review provided.' }}</p>
-a
-          <!-- Edit button -->
-          <button @click="editReview(movie)" class="edit-btn">Edit Review</button>
-        </div>
+          <div class="media-content">
+            <router-link :to="`/movie/${movie.id}`">
+              <h3 class="title is-5">{{ movie.title }}</h3>
+            </router-link>
 
-        <!-- Review edit form -->
-        <div v-else>
-          <div class="star-rating">
-            <span
-              v-for="star in 10"
-              :key="star"
-              @click="setRating(movie, star)"
-              :class="{'filled': movie.review.rating >= star}"
-              class="star"
-            >
-              ★
-            </span>
+            <div v-if="!movie.isEditing">
+              <p><strong>Added on:</strong> {{ movie.added_date ? new Date(movie.added_date).toLocaleDateString() : 'N/A' }}</p>
+              <p><strong>Rating:</strong> <span v-html="generateStarRating(movie.review.rating)"></span></p>
+              <p><strong>Review:</strong> {{ movie.review.note || 'No review provided.' }}</p>
+
+              <button @click="editReview(movie)" class="button is-primary mt-2">Edit Review</button>
+            </div>
+
+            <div v-else>
+              <div class="mb-2">
+                <p class="has-text-weight-semibold">Your Rating:</p>
+                <div class="star-rating mb-2">
+                  <span
+                    v-for="star in 10"
+                    :key="star"
+                    @click="setRating(movie, star)"
+                    :class="{'has-text-warning': movie.review.rating >= star}"
+                    class="star is-size-4 mr-1"
+                    style="cursor: pointer;"
+                  >
+                    ★
+                  </span>
+                </div>
+              </div>
+
+              <div class="field">
+                <div class="control">
+                  <textarea class="textarea" v-model="movie.review.note" placeholder="Write your review here..."></textarea>
+                </div>
+              </div>
+
+              <div class="buttons mt-3">
+                <button @click="saveReview(movie)" class="button">Save Review</button>
+                <button @click="removeFromWatched(movie.id)" class="button">Remove Movie</button>
+              </div>
+            </div>
           </div>
-          <textarea v-model="movie.review.note" placeholder="Write your review here..."></textarea>
-          <button @click="saveReview(movie)" class="save-btn">Save Review</button>
-          <button @click="removeFromWatched(movie.id)" class="remove-btn">Remove Movie</button>
         </div>
       </div>
     </div>
   </div>
 </template>
 
+
 <script setup>
 import { ref, onMounted, computed } from 'vue'
 import { getAuth } from 'firebase/auth'
 import { doc, getDoc, updateDoc } from 'firebase/firestore'
 import { db } from '../firebase'
-import RatingD3Chart from '../components/RatingD3Chart.vue' // <-- this was outside before
+import RatingD3Chart from '../components/RatingD3Chart.vue' 
 
 const watchedMovies = ref([])
-const showGraph = ref(false) // <-- added
-const ratingData = computed(() => watchedMovies.value.map(movie => movie.review?.rating)) // <-- added
+const showGraph = ref(false) 
+const ratingData = computed(() => watchedMovies.value.map(movie => movie.review?.rating))
 
 // Fetch watched movies from Firestore
 onMounted(async () => {
@@ -162,70 +177,18 @@ const generateStarRating = (rating) => {
 }
 
 </script>
-
 <style scoped>
+.movie-link h3 {
+  color: #363636;
+  margin-top: 10px;
+  font-weight: 600;
+}
+
+
 .watched-view {
   padding: 20px;
 }
 
-.movie-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 20px;
-}
-
-.movie-item {
-  flex: 1 1 200px;
-  max-width: 250px;
-}
-
-.movie-item img {
-  width: 100%;
-  height: auto;
-}
-
-.movie-info {
-  text-align: center;
-}
-
-.edit-btn,
-.save-btn,
-.remove-btn {
-  margin-top: 10px;
-  padding: 5px 10px;
-  background-color: rgb(0, 145, 255);
-  color: white;
-  border: none;
-  cursor: pointer;
-}
-
-.edit-btn:hover,
-.save-btn:hover,
-.remove-btn:hover {
-  background-color: rgb(0, 145, 255);
-}
-
-.no-movies {
-  text-align: center;
-}
-
-.movie-link {
-  text-decoration: none;
-}
-
-.movie-link h3 {
-  font-size: 1.2rem;
-  margin-top: 10px;
-  color: #333;
-}
-
-.movie-link img {
-  max-width: 150px;
-  max-height: 225px;
-  object-fit: cover;
-}
-
-/* Star rating styles */
 .star-rating {
   display: flex;
   gap: 5px;
@@ -237,7 +200,12 @@ const generateStarRating = (rating) => {
   color: #ccc;
 }
 
-.star.filled {
+.star.filled,
+.has-text-warning {
   color: #ffb400;
+}
+
+.star:hover {
+  color: #ffaa00;
 }
 </style>
