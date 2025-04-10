@@ -39,6 +39,11 @@ To install bulma:
 ```
 npm install bulma
 ```
+To install express, in case not initially there: 
+
+```
+npm install express
+```
 
 ### 3. Firebase Setup
 
