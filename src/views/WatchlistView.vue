@@ -1,18 +1,31 @@
 <template>
-  <div class="watchlist-view">
-    <h1>Your Watch List</h1>
-    <div v-if="wantToWatchMovies.length === 0" class="no-movies">
-      <p>Start adding some movies!</p>
+  <div class="watchlist-view container py-5">
+    <h1 class="title is-3 has-text-centered">Your Watch List</h1>
+
+    <div v-if="wantToWatchMovies.length === 0" class="has-text-centered mt-5">
+      <p class="subtitle is-5">Start adding some movies!</p>
     </div>
 
-    <div v-else class="movie-list">
-      <div v-for="movie in wantToWatchMovies" :key="movie.id" class="movie-item">
-        <router-link :to="`/movie/${movie.id}`" class="movie-link">
-          <img :src="getImageUrl(movie.poster_path)" alt="Movie Poster" width="150" />
-          <h3>{{ movie.title }}</h3>
-        </router-link>
-        <p><strong>Added on:</strong> {{ movie.added_date ? new Date(movie.added_date).toLocaleDateString() : 'N/A' }}</p>
-        <button @click="removeFromWantToWatch(movie.id)" class="remove-btn">Remove Movie</button>
+    <div v-else class="columns is-multiline is-variable is-4">
+      <div v-for="movie in wantToWatchMovies" :key="movie.id" class="column is-one-quarter">
+        <div class="card">
+          <div class="card-image">
+            <router-link :to="`/movie/${movie.id}`">
+              <figure class="image is-3by4">
+                <img :src="getImageUrl(movie.poster_path)" alt="Movie Poster" />
+              </figure>
+            </router-link>
+          </div>
+          <div class="card-content has-text-centered">
+            <p class="title is-6">{{ movie.title }}</p>
+            <p class="is-size-7 has-text-grey">
+              <strong>Added on:</strong> {{ movie.added_date ? new Date(movie.added_date).toLocaleDateString() : 'N/A' }}
+            </p>
+            <button @click="removeFromWantToWatch(movie.id)" class="button is-info is-small mt-3">
+              Remove Movie
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -72,43 +85,6 @@ const removeFromWantToWatch = async (movieId) => {
 </script>
 
 <style scoped>
-.watchlist-view {
-  padding: 20px;
-}
-
-.movie-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 20px;
-}
-
-.movie-item {
-  flex: 1 1 200px;
-  max-width: 250px;
-}
-
-.movie-item img {
-  width: 100%;
-  height: auto;
-}
-
-.movie-info {
-  text-align: center;
-}
-
-.remove-btn {
-  margin-top: 10px;
-  padding: 5px 10px;
-  background-color: rgb(0, 145, 255);
-  color: white;
-  border: none;
-  cursor: pointer;
-}
-
-.remove-btn:hover {
-  background-color: rgb(0, 110, 220);
-}
-
 .no-movies {
   text-align: center;
 }
