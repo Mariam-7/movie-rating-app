@@ -34,6 +34,12 @@ Run the following command to install the necessary dependencies:
 npm install
 ```
 
+To install bulma: 
+
+```
+npm install bulma
+```
+
 ### 3. Firebase Setup
 
 This app uses Firebase for authentication and Firestore database. To set it up:
