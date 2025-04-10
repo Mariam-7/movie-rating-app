@@ -69,13 +69,11 @@ export default {
     const user = auth.currentUser
 
     if (user) {
-      // Fetch the username from Firebase Authentication
-      this.username = user.displayName || user.email || 'Guest' // Use displayName first, else email
+      // Fetch username / guest if no name/email
+      this.username = user.displayName || user.email || 'Guest' 
     } else {
       this.username = 'Guest'
     }
-
-    // Load popular movies using MovieService
     this.movies = await getPopularMovies()
   },
 

@@ -9,7 +9,7 @@ const ratingData = computed(() => watchedMovies.value.map(movie => movie.review?
     <div v-if="watchedMovies.length === 0">
       <p>Start adding some movies!</p>
     </div>
-
+    <!-- Users rating Graph -->
     <button @click="showGraph = !showGraph" class="button">
       {{ showGraph ? 'Hide Rating Breakdown' : 'Show Rating Breakdown' }}
     </button>
@@ -117,12 +117,12 @@ const editReview = (movie) => {
   movie.isEditing = true;
 }
 
-// Set the rating when the user clicks a star
+// Set star rating
 const setRating = (movie, rating) => {
   movie.review.rating = rating;
 }
 
-// Save the edited review to Firestore
+// Edit and updates firebase
 const saveReview = async (movie) => {
   const user = getAuth().currentUser;
   if (user) {
@@ -130,32 +130,30 @@ const saveReview = async (movie) => {
     const docSnap = await getDoc(userRef);
     let watchedList = docSnap.exists() ? docSnap.data().watched || [] : [];
 
-    // Find the movie in the watched list
     const movieIndex = watchedList.findIndex((m) => m.id === movie.id);
     if (movieIndex !== -1) {
-      watchedList[movieIndex].review = movie.review; // Update the review
+      watchedList[movieIndex].review = movie.review;
 
-      // Save the updated list back to Firestore
       await updateDoc(userRef, {
         watched: watchedList,
       });
-      movie.isEditing = false; // Close the edit form
+      movie.isEditing = false; 
       console.log('Review updated successfully!');
     }
   }
 }
 
-// Remove a movie from the watched list and update Firestore
+// Remove and update firebase
 const removeFromWatched = async (movieId) => {
   const updatedWatched = watchedMovies.value.filter((movie) => movie.id !== movieId);
-  watchedMovies.value = updatedWatched; // Immediate UI update
+  watchedMovies.value = updatedWatched;
 
   const user = getAuth().currentUser;
   if (user) {
     try {
       const userRef = doc(db, 'users', user.uid);
       await updateDoc(userRef, {
-        watched: updatedWatched, // Update the watched list in Firestore
+        watched: updatedWatched,
       });
       console.log('Movie removed from watched list in Firestore!');
     } catch (error) {
@@ -165,7 +163,6 @@ const removeFromWatched = async (movieId) => {
   alert('Movie removed from Watched list!');
 }
 
-// Generate star rating HTML for display
 const generateStarRating = (rating) => {
   if (!rating) return '';
 

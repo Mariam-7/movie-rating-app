@@ -9,8 +9,6 @@
           {{ loading ? 'Logging in...' : 'Login' }}
         </button>
         <p class="error" v-if="error">{{ error }}</p>
-
-        <!-- Forgot password link always visible -->
         <p class="reset-link" @click="handleReset">
           Forgot password?
         </p>
@@ -33,16 +31,15 @@ import {
 } from 'firebase/auth'
 import { auth } from '@/firebase'
 
-// Reactive variables
 const email = ref('')
 const password = ref('')
 const error = ref('')
 const success = ref('')
 const loading = ref(false)
-const resetTime = ref(null) // Store the time of last reset request
+const resetTime = ref(null) 
 const router = useRouter()
 
-const RESET_TIMEOUT = 10000;
+const RESET_TIMEOUT = 10000; //can't send back to back
 
 const handleLogin = async () => {
   error.value = ''
@@ -62,9 +59,7 @@ const handleLogin = async () => {
     }
     
     success.value = `Welcome back, ${userCredential.user.email}!`
-    password.value = '' // Clear password after successful login
-    
-    // Small delay to show success message
+    password.value = '' 
     router.push('/home')
   } catch (err) {
     handleLoginError(err)
@@ -73,9 +68,8 @@ const handleLogin = async () => {
   }
 }
 
-// Password reset handler with time check
+// Password reset 
 const handleReset = async () => {
-  // Check if 5 minutes have passed since the last request
   const currentTime = new Date().getTime();
   
   if (resetTime.value && currentTime - resetTime.value < RESET_TIMEOUT) {
@@ -92,15 +86,12 @@ const handleReset = async () => {
   try {
     await sendPasswordResetEmail(auth, email.value.trim())
     error.value = 'Password reset email sent. Check your inbox.'
-    
-    // Store the current time to prevent multiple requests within 5 minutes
     resetTime.value = currentTime;
   } catch (err) {
     error.value = getLoginError(err.code)
   }
 }
-
-// Error handling helper
+// check for error type
 const handleLoginError = (err) => {
   console.error('Login error:', err.code)
   
@@ -113,8 +104,6 @@ const handleLoginError = (err) => {
       error.value = getLoginError(err.code)
   }
 }
-
-// Error message mapper
 const getLoginError = (code) => {
   const errors = {
     'auth/invalid-email': 'Invalid email format',

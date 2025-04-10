@@ -19,37 +19,30 @@
 import { ref, onMounted } from 'vue';
 import { getAuth, updateProfile, updateEmail } from 'firebase/auth';
 import { doc, updateDoc, getDoc } from 'firebase/firestore';
-import { db } from '@/firebase'; // Assuming your Firestore instance is imported like this
-
-// Initialize the user object to hold form data
+import { db } from '@/firebase'; 
 const user = ref({
   username: '',
   email: ''
 });
 
-// Fetch the current user's info onMounted
+// Fetch user data
 onMounted(() => {
   const currentUser = getAuth().currentUser;
   if (currentUser) {
-    // Get user data and set it to form fields
     user.value.username = currentUser.displayName || '';
     user.value.email = currentUser.email || '';
   }
 });
 
-// Handle updating the user settings
 const updateSettings = async () => {
   const currentUser = getAuth().currentUser;
   if (currentUser) {
     try {
-      // Update Firebase Authentication details (username/displayName and email)
       await updateProfile(currentUser, { displayName: user.value.username });
 
       if (user.value.email !== currentUser.email) {
-        await updateEmail(currentUser, user.value.email); // Update email if it was changed
+        await updateEmail(currentUser, user.value.email); 
       }
-
-      // Optionally, update Firestore user data (if stored there)
       const userRef = doc(db, 'users', currentUser.uid);
       const docSnap = await getDoc(userRef);
       if (docSnap.exists()) {

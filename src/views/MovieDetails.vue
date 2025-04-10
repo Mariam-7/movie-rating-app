@@ -7,7 +7,7 @@
             <img :src="posterUrl" alt="Movie Poster" />
           </figure>
         </div>
-
+        <!-- Movie Details -->
         <div class="column">
           <h1 class="title">{{ movie.title }}</h1>
           <p><strong>Release Date:</strong> {{ movie.release_date || 'N/A' }}</p>
@@ -27,11 +27,11 @@
           <div class="buttons mt-4">
             <button @click="showTrailer" class="button">Watch Trailer</button>
             <button @click="handleWatchedClick" class="button">Watched</button>
-            <button @click="addToWantToWatch" class="button is-info mt-3">Add to Wsaatchlist</button>
+            <button @click="addToWantToWatch" class="button is-info mt-3">Add to Watchlist</button>
           </div>
         </div>
       </div>
-
+      <!-- Trailer Details  -->
       <div v-if="trailerUrl" class="box mt-5">
         <div class="video">
           <iframe
@@ -43,7 +43,7 @@
         </div>
         <button @click="closeTrailer" class="button is-danger mt-3">Close</button>
       </div>
-
+      <!-- Adding Review -->
       <div v-if="showReviewForm" class="box mt-5">
         <h3 class="title is-4">Leave a Review</h3>
 
@@ -65,7 +65,7 @@
 
         <button @click="saveReview" class="button is-info mt-3">Submit Review</button>
       </div>
-
+      <!-- Rec Movies at bottom -->
       <div v-if="recommendedMovies.length" class="mt-6">
         <h2 class="title is-5">Similar Movies</h2>
         <div class="columns is-multiline is-mobile">
@@ -95,19 +95,17 @@
   <script setup>
   import { onMounted, ref, computed } from 'vue'
   import { useRoute, useRouter } from 'vue-router'
-  import { getAuth, onAuthStateChanged } from 'firebase/auth' // <-- Correct import here
+  import { getAuth, onAuthStateChanged } from 'firebase/auth'
   import { doc, getDoc, updateDoc } from 'firebase/firestore'
   import { db } from '../firebase'
-  const router = useRouter(); // <-- Initialize the router
-  
-  // Import methods from MovieService.js
   import { getMovieDetails, getImageUrl, getPopularMovies, searchMovies } from '../MovieService'
-  
+  const router = useRouter();
   const route = useRoute()
   const movie = ref(null)
   const trailerUrl = ref(null)
   const recommendedMovies = ref([])
   const watchedMovies = ref([])
+  
   // Control the visibility of the review form
   const showReviewForm = ref(false)
   const review = ref({
@@ -119,10 +117,8 @@
   onMounted(async () => {
     const id = route.params.id
     try {
-      // Use getMovieDetails from MovieService to fetch movie details
+      // fetch details and populate recommended
       movie.value = await getMovieDetails(id)
-  
-      // Fetch recommended movies (you can create a method for that as well in the service)
       recommendedMovies.value = await getPopularMovies()
     } catch (error) {
       console.error('Error fetching movie details or recommendations:', error)
@@ -141,7 +137,7 @@
 
   // Handle adding to the watched list
   const handleWatchedClick = () => {
-    showReviewForm.value = true // Show the review form when "Watched" is clicked
+    showReviewForm.value = true 
   }
   
   const saveReview = async () => {
@@ -161,7 +157,7 @@
         title: movie.value.title,
         poster_path: movie.value.poster_path,
         release_date: movie.value.release_date,
-        added_date: new Date().toISOString(), // This will store the current date and time
+        added_date: new Date().toISOString(),
         review: {
           rating: review.value.rating,
           note: review.value.note,
@@ -173,7 +169,7 @@
         await updateDoc(userRef, {
           watched: watchedList,
         })
-        showReviewForm.value = false // Close the review form
+        showReviewForm.value = false // Close form
         console.log('Movie and review added to watched list!')
       } else {
         alert('Movie already in Watched list!')
@@ -181,26 +177,24 @@
     }
   }
   const addToWantToWatch = async () => {
-  const user = getAuth().currentUser; // Get the current user
+  const user = getAuth().currentUser;
   if (user) {
-    const userRef = doc(db, 'users', user.uid); // Reference to the user's document
-    const docSnap = await getDoc(userRef); // Fetch the user data
+    const userRef = doc(db, 'users', user.uid); 
+    const docSnap = await getDoc(userRef); 
 
     let watchList = docSnap.exists() ? docSnap.data().watchList || [] : []; // Get existing watchlist or initialize an empty array
-
     const movieData = {
       id: movie.value.id,
       title: movie.value.title,
       poster_path: movie.value.poster_path,
       release_date: movie.value.release_date,
-      added_date: new Date().toISOString(), // Store the added date
+      added_date: new Date().toISOString(), 
     };
-
-    // Check if the movie already exists in the watchlist to avoid duplicates
+    // Check if duplicates
     if (!watchList.some((m) => m.id === movie.value.id)) {
       watchList.push(movieData); // Add the movie to the list
       try {
-        await updateDoc(userRef, { watchList }); // Update the watchlist in Firestore (note the correct field name)
+        await updateDoc(userRef, { watchList });
         console.log('Movie added to watchlist!');
       } catch (error) {
         console.error('Error adding movie to watchlist:', error);
@@ -211,13 +205,12 @@
   }
 };
   
-  // Set rating when a star is clicked
+  // set ratinsg
   const setRating = (rating) => {
     review.value.rating = rating
-    ratingError.value = false // Reset error message
+    ratingError.value = false
   }
-  
-  // Fetch movie poster image using the imported getImageUrl method
+  // fecth poster
   const posterUrl = computed(() =>
     movie.value?.poster_path ? getImageUrl(movie.value.poster_path) : '',
   )
@@ -261,7 +254,7 @@
   }
   const fetchWatchlist = async (user) => {
   try {
-    const userRef = doc(db, 'users', user.uid)  // Refer to the user's document
+    const userRef = doc(db, 'users', user.uid) 
     const docSnap = await getDoc(userRef)
 
     if (docSnap.exists()) {
@@ -273,8 +266,6 @@
     console.error('Error fetching watchlist:', error)
   }
 }
-
-  
   const formattedDuration = computed(() => {
     const duration = movie.value?.runtime
     if (duration) {
@@ -283,8 +274,8 @@
       return `${hours}h ${minutes}m`
     }
     return 'N/A'
-  })
-  
+  }
+)
   const starRating = computed(() => {
     const ratingOutOfFive = Math.round((movie.value?.vote_average || 0) / 2)
     return '★'.repeat(ratingOutOfFive) + '☆'.repeat(5 - ratingOutOfFive)
@@ -305,8 +296,6 @@
       fetchMovieData(id)
     })
   }
-  
-  
   </script>
   
   <style scoped>

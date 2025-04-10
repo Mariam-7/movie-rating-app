@@ -21,7 +21,6 @@
 </template>
 
 <script setup>
-// 1. Import all required Vue functions
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { 
@@ -39,14 +38,13 @@ const success = ref('')
 const loading = ref(false)
 const router = useRouter()
 
-// 2. Properly handle async errors
 const handleSignup = async () => {
   error.value = ''
   success.value = ''
   loading.value = true
 
   try {
-    // Input validation
+    // Input validation for creating acct
     if (!email.value || !password.value || !username.value) {
       throw new Error('Email and password are required')
     }
@@ -54,7 +52,6 @@ const handleSignup = async () => {
       throw new Error('Password must be at least 6 characters')
     }
 
-    // Firebase operations
     const userCredential = await createUserWithEmailAndPassword(
       auth,
       email.value.trim(),
@@ -83,7 +80,6 @@ const handleSignup = async () => {
   }
 }
 
-// 3. Example of using onMounted (if needed)
 onMounted(() => {
   console.log('SignUp component mounted')
 })
