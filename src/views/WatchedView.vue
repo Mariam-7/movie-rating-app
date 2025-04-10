@@ -4,7 +4,7 @@ const ratingData = computed(() => watchedMovies.value.map(movie => movie.review?
 
 <template>
   <div class="watched-view section">
-    <h1 class="title is-3">Your Watched Movies</h1>
+    <h1 class="title is-3 has-text-centered">Your Watched Movies</h1>
 
     <div v-if="watchedMovies.length === 0">
       <p>Start adding some movies!</p>
