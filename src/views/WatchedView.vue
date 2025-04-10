@@ -1,3 +1,11 @@
+<<<<<<< HEAD
+=======
+import RatingD3Chart from '../components/RatingD3Chart.vue'
+const showGraph = ref(false)
+const ratingData = computed(() => watchedMovies.value.map(movie => movie.review?.rating))
+
+
+>>>>>>> 1d69e5121d82489f2bba48a83a09cd5fd6ff9b7f
 <template>
   <div class="watched-view">
     <h1>Your Watched Movies</h1>
@@ -7,6 +15,18 @@
       <p>Start adding some movies!</p>
     </div>
 
+<<<<<<< HEAD
+=======
+    <!-- Display rating bar graph toggle -->
+    <button @click="showGraph = !showGraph" class="edit-btn" style="margin-bottom: 20px;">
+      {{ showGraph ? 'Hide Rating Breakdown' : 'Show Rating Breakdown' }}
+    </button>
+
+    <div v-if="showGraph" style="margin-bottom: 30px;">
+      <RatingD3Chart :ratings="ratingData" />
+    </div>
+
+>>>>>>> 1d69e5121d82489f2bba48a83a09cd5fd6ff9b7f
     <!-- Display movies if watchedMovies is populated -->
     <div v-else class="movie-list">
       <div v-for="movie in watchedMovies" :key="movie.id" class="movie-item">
@@ -51,6 +71,10 @@ import { ref, onMounted } from 'vue'
 import { getAuth } from 'firebase/auth'
 import { doc, getDoc, updateDoc } from 'firebase/firestore'
 import { db } from '../firebase'
+<<<<<<< HEAD
+=======
+import RatingD3Chart from '../components/RatingD3Chart.vue' // <-- this was outside before
+>>>>>>> 1d69e5121d82489f2bba48a83a09cd5fd6ff9b7f
 
 const watchedMovies = ref([])
 
