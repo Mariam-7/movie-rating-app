@@ -1,25 +1,56 @@
 <template>
-  <div class="home">
-    <div class="page-content">
-      <div class="search-bar">
-        <h1>Welcome back, {{ userEmail }}!</h1>
-        <button @click="handleLogout" class="logout-btn">Logout</button>
-        <input v-model="query" @input="searchMovies" placeholder="Search for movies..." />
+  <section class="section home">
+    <div class="container">
+      <div class="box">
+        <div class="level">
+          <div class="level-left">
+            <h1 class="title">Welcome back, {{ userEmail }}!</h1>
+          </div>
+          <div class="level-right">
+            <button @click="handleLogout" class="button is-danger">Logout</button>
+          </div>
+        </div>
+
+        <div class="field">
+          <div class="control">
+            <input
+              class="input"
+              v-model="query"
+              @input="searchMovies"
+              placeholder="Search for movies..."
+            />
+          </div>
+        </div>
       </div>
-      <div class="dashboard">
-        <div v-if="movies.length" class="movie-carousel">
-          <div v-for="movie in movies" :key="movie.id" class="movie-card">
+
+      <div class="columns is-multiline is-mobile">
+        <div
+          v-for="movie in movies"
+          :key="movie.id"
+          class="column is-one-fifth"
+        >
+          <div class="card">
             <router-link :to="`/movie/${movie.id}`">
-              <img :src="getImageUrl(movie.poster_path)" alt="Movie" width="150" />
-              <h3>{{ movie.title }}</h3>
+              <div class="card-image">
+                <figure class="image is-3by4">
+                  <img :src="getImageUrl(movie.poster_path)" alt="Movie" />
+                </figure>
+              </div>
+              <div class="card-content">
+                <p class="title is-6">{{ movie.title }}</p>
+              </div>
             </router-link>
           </div>
         </div>
-        <p v-else>Start by searching for movies!</p>
       </div>
+
+      <p v-if="!movies.length" class="has-text-centered mt-6">
+        Start by searching for movies!
+      </p>
     </div>
-  </div>
+  </section>
 </template>
+
 
 <script>
 import { searchMovies, getImageUrl, getPopularMovies } from '../MovieService'
@@ -99,24 +130,5 @@ export default {
 img {
   width: 100%;
   height: auto;
-}
-
-.search-bar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
-}
-
-.logout-btn {
-  padding: 10px 20px;
-  background-color: #007bff;
-  color: white;
-  border: none;
-  cursor: pointer;
-}
-
-.logout-btn:hover {
-  background-color: #0056b3;
 }
 </style>
