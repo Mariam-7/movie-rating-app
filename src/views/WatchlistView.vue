@@ -11,7 +11,7 @@
           <img :src="getImageUrl(movie.poster_path)" alt="Movie Poster" width="150" />
           <h3>{{ movie.title }}</h3>
         </router-link>
-        <p>{{ movie.overview }}</p>
+        <p><strong>Added on:</strong> {{ movie.added_date ? new Date(movie.added_date).toLocaleDateString() : 'N/A' }}</p>
         <button @click="removeFromWantToWatch(movie.id)" class="remove-btn">Remove Movie</button>
       </div>
     </div>

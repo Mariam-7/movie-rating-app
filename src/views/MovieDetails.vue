@@ -71,14 +71,14 @@
       <button @click="addToWantToWatch">Want to Watch</button>
     </div>
 
-    <div v-if="recommendedMovies.length" class="recommended-section">
+    < <div v-if="recommendedMovies.length" class="recommended-section">
       <h2>Similar Movies</h2>
       <div class="recommended-list">
         <div v-for="rec in recommendedMovies" :key="rec.id" class="recommended-item">
-          <router-link :to="`/movie/${rec.id}`" class="rec-link">
+          <div @click="navigateToMovie(rec.id)" class="rec-link">
             <img :src="getImageUrl(rec.poster_path)" alt="Recommended Movie" />
             <p>{{ rec.title }}</p>
-          </router-link>
+          </div>
         </div>
       </div>
     </div>
@@ -87,10 +87,11 @@
 
 <script setup>
 import { onMounted, ref, computed } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { getAuth } from 'firebase/auth'
 import { doc, getDoc, updateDoc } from 'firebase/firestore'
 import { db } from '../firebase'
+const router = useRouter(); // <-- Initialize the router
 
 // Import methods from MovieService.js
 import { getMovieDetails, getImageUrl, getPopularMovies, searchMovies } from '../MovieService'
@@ -143,6 +144,7 @@ const saveReview = async () => {
       title: movie.value.title,
       poster_path: movie.value.poster_path,
       release_date: movie.value.release_date,
+      added_date: new Date().toISOString(), // This will store the current date and time
       review: {
         rating: review.value.rating,
         note: review.value.note,
@@ -223,7 +225,7 @@ const addToWantToWatch = async () => {
       title: movie.value.title,
       poster_path: movie.value.poster_path,
       release_date: movie.value.release_date,
-      overview: movie.value.overview,
+      added_date: new Date().toISOString(), // Add date when the movie is added
     }
     if (!wantToWatchList.find((m) => m.id === movie.value.id)) {
       wantToWatchList.push(movieData)
@@ -251,6 +253,24 @@ const starRating = computed(() => {
   const ratingOutOfFive = Math.round((movie.value?.vote_average || 0) / 2)
   return '★'.repeat(ratingOutOfFive) + '☆'.repeat(5 - ratingOutOfFive)
 })
+const fetchMovieData = async (id) => {
+  try {
+    movie.value = await getMovieDetails(id)
+    recommendedMovies.value = await getPopularMovies()
+  } catch (error) {
+    console.error('Error fetching movie data:', error)
+  }
+}
+
+const navigateToMovie = (id) => {
+  console.log('Navigating to movie with id:', id)
+  router.push({ name: 'MovieDetails', params: { id } }).then(() => {
+    // Manually call the function that fetches the movie data again
+    fetchMovieData(id)
+  })
+}
+
+
 </script>
 
 <style scoped>

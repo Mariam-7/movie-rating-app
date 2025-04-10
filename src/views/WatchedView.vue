@@ -1,11 +1,8 @@
-<<<<<<< HEAD
-=======
 import RatingD3Chart from '../components/RatingD3Chart.vue'
 const showGraph = ref(false)
 const ratingData = computed(() => watchedMovies.value.map(movie => movie.review?.rating))
 
 
->>>>>>> 1d69e5121d82489f2bba48a83a09cd5fd6ff9b7f
 <template>
   <div class="watched-view">
     <h1>Your Watched Movies</h1>
@@ -15,8 +12,6 @@ const ratingData = computed(() => watchedMovies.value.map(movie => movie.review?
       <p>Start adding some movies!</p>
     </div>
 
-<<<<<<< HEAD
-=======
     <!-- Display rating bar graph toggle -->
     <button @click="showGraph = !showGraph" class="edit-btn" style="margin-bottom: 20px;">
       {{ showGraph ? 'Hide Rating Breakdown' : 'Show Rating Breakdown' }}
@@ -26,7 +21,6 @@ const ratingData = computed(() => watchedMovies.value.map(movie => movie.review?
       <RatingD3Chart :ratings="ratingData" />
     </div>
 
->>>>>>> 1d69e5121d82489f2bba48a83a09cd5fd6ff9b7f
     <!-- Display movies if watchedMovies is populated -->
     <div v-else class="movie-list">
       <div v-for="movie in watchedMovies" :key="movie.id" class="movie-item">
@@ -37,9 +31,10 @@ const ratingData = computed(() => watchedMovies.value.map(movie => movie.review?
 
         <!-- Display the review for the movie -->
         <div v-if="!movie.isEditing">
+          <p><strong>Added on:</strong> {{ movie.added_date ? new Date(movie.added_date).toLocaleDateString() : 'N/A' }}</p>
           <p><strong>Rating:</strong> <span v-html="generateStarRating(movie.review.rating)"></span></p>
           <p><strong>Review:</strong> {{ movie.review.note || 'No review provided.' }}</p>
-
+a
           <!-- Edit button -->
           <button @click="editReview(movie)" class="edit-btn">Edit Review</button>
         </div>
@@ -47,10 +42,10 @@ const ratingData = computed(() => watchedMovies.value.map(movie => movie.review?
         <!-- Review edit form -->
         <div v-else>
           <div class="star-rating">
-            <span 
-              v-for="star in 10" 
-              :key="star" 
-              @click="setRating(movie, star)" 
+            <span
+              v-for="star in 10"
+              :key="star"
+              @click="setRating(movie, star)"
               :class="{'filled': movie.review.rating >= star}"
               class="star"
             >
@@ -67,18 +62,17 @@ const ratingData = computed(() => watchedMovies.value.map(movie => movie.review?
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { getAuth } from 'firebase/auth'
 import { doc, getDoc, updateDoc } from 'firebase/firestore'
 import { db } from '../firebase'
-<<<<<<< HEAD
-=======
 import RatingD3Chart from '../components/RatingD3Chart.vue' // <-- this was outside before
->>>>>>> 1d69e5121d82489f2bba48a83a09cd5fd6ff9b7f
 
 const watchedMovies = ref([])
+const showGraph = ref(false) // <-- added
+const ratingData = computed(() => watchedMovies.value.map(movie => movie.review?.rating)) // <-- added
 
-// Fetch watched movies from Firestore when the component is mounted
+// Fetch watched movies from Firestore
 onMounted(async () => {
   const user = getAuth().currentUser;
   if (user) {
@@ -86,7 +80,6 @@ onMounted(async () => {
       const userRef = doc(db, 'users', user.uid);
       const docSnap = await getDoc(userRef);
       if (docSnap.exists()) {
-        // Load watched movies from Firestore (if any)
         watchedMovies.value = docSnap.data().watched || [];
       } else {
         console.log('No watched movies found for this user');
@@ -159,12 +152,15 @@ const removeFromWatched = async (movieId) => {
 
 // Generate star rating HTML for display
 const generateStarRating = (rating) => {
+  if (!rating) return ''; 
+
   let stars = '';
   for (let i = 1; i <= 10; i++) {
     stars += i <= rating ? '★' : '☆';
   }
   return stars;
 }
+
 </script>
 
 <style scoped>
